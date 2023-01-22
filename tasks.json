@@ -70,13 +70,8 @@
 	{
 		"name": "Externe LED zum blinken bringen",
 		"desc": "Noch mehr blink, blink!",
+		"wiring": "led-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/led-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"type": "dialog",
 				"title": "Wiederstand",
@@ -124,18 +119,13 @@
 	{
 		"name": "LED mit Knopf steuern",
 		"desc": "Steuere die LED selber!",
+		"wiring": "button-wiring.png",
 		"instructions": [
 			{
 				"type": "dialog",
 				"title": "Umgang mit Knöpfen",
-				"text": "Achtung, beim rein und rausstecken von Knöpfen auf dem Steckbrett kann man sehr einfach die Pins verbiegen.",
+				"text": "Achtung, beim rausstecken von Knöpfen auf dem Steckbrett kann man sehr einfach die Pins verbiegen.",
 				"closeButton": "Ok"
-			},
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/button-wiring.png\">",
-				"closeButton": "Fertig"
 			},
 			{
 				"text": "Mache erneut eine unendliche Schleife",
@@ -177,13 +167,8 @@
 	{
 		"name": "LED mit Poti steuern",
 		"desc": "Hell! Dunkel!",
+		"wiring": "poti-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/poti-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"text": "Mache noch eine unendliche Schleife",
 				"block": "control_forever",
@@ -212,13 +197,8 @@
 	{
 		"name": "Fotoresistor",
 		"desc": "Helligkeit messen",
+		"wiring": "photo-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/photo-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"text": "Mache noch eine unendliche Schleife",
 				"block": "control_forever",
@@ -258,13 +238,8 @@
 	{
 		"name": "RGB cycle",
 		"desc": "Discooooooooo!",
+		"wiring": "rgb-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/rgb-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"type": "dialog",
 				"title": "RGB LED",
@@ -609,13 +584,8 @@
 			"bLoopChange": "9zAN(=gY!DO[Ap8VCm90",
 			"bLoopSleep": "mkjILpIL{Dq#atg@T`.P"
 		},
+		"wiring": "rgb-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/rgb-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"type": "dialog",
 				"title": "WIP",
@@ -736,13 +706,8 @@
 	{
 		"name": "Ultraschall Sensor",
 		"desc": "Beep! Boop! 36cm Abstand!",
+		"wiring": "ultrasonic-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/ultrasonic-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"type": "dialog",
 				"title": "Ultraschallsensor",
@@ -817,13 +782,8 @@
 	{
 		"name": "PIR Sensor",
 		"desc": "Bewegung erkannt!",
+		"wiring": "pir-wiring.png",
 		"instructions": [
-			{
-				"type": "dialog",
-				"title": "Wiring",
-				"text": "Stecke auf dem Steckbrett:<br><img width=\"80%\" src=\"PICOSCRATCHSERVER/img/pir-wiring.png\">",
-				"closeButton": "Fertig"
-			},
 			{
 				"type": "dialog",
 				"title": "PIR Sensor",

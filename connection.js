@@ -251,8 +251,7 @@ export class Connection {
 					for(const logged of loggedIn) {
 						if(logged.clientType == "student") {
 							if(!logged.room) continue;
-							if(!logged.room.course) continue;
-							if(!logged.room.course.uuid == course.uuid) continue;
+							if(!logged.room.courseUuid == course.uuid) continue;
 							logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
 						} else if(logged.clientType == "teacher") {
 							if(logged.cid == this.cid) continue;
@@ -283,8 +282,8 @@ export class Connection {
 					}
 					for(const logged of loggedIn) {
 						if(logged.clientType == "student") {
-							if(!logged.room.course) continue;
-							if(!logged.room.course.uuid == course.uuid) continue;
+							if(!logged.room) continue;
+							if(!logged.room.courseUuid == course.uuid) continue;
 							logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
 						} else if(logged.clientType == "teacher") {
 							// if(logged.cid == this.cid) continue;
