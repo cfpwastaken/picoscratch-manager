@@ -250,6 +250,7 @@ export class Connection {
 					await student.destroy();
 					for(const logged of loggedIn) {
 						if(logged.clientType == "student") {
+							if(!logged.room) continue;
 							if(!logged.room.course) continue;
 							if(!logged.room.course.uuid == course.uuid) continue;
 							logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
@@ -312,6 +313,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "login", success: false, error: "Missing name"}));
 						return;
 					}
+					this.room.reload();
 					const course = await this.room.getCourse();
 					if(course == null) {
 						this.ws.send(JSON.stringify({type: "login", success: false, error: "Teacher has not set a course yet"}));

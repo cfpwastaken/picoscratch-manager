@@ -417,8 +417,8 @@ function renderLeaderboard(leaderboard) {
 }
 
 // await loginSchoolcode("86583-69062-02563-05283");
-await loginSchoolcode("yH28qBq");
-await loginSchool(uuid, "admin", "secret");
+// await loginSchoolcode("yH28qBq");
+// await loginSchool(uuid, "admin", "secret");
 
 $("#schoolcode-container").addEventListener("keyup", async (e) => {
 	if(!e.key) return;
