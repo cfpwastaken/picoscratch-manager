@@ -18,8 +18,19 @@ html::after {
 
 	width: 110vw;
 	height: 110vw;
-
+	
 	background: radial-gradient(50% 50% at 50% 50%, rgba(64, 195, 64, 0.5) 15%, rgba(64, 195, 64, 0) 100%);
+
+	animation: scaleIn 2s forwards ease;
+}
+
+@keyframes scaleIn {
+	from {
+		transform: scale(0);
+	}
+	to {
+		transform: scale(1);
+	}
 }
 
 input,
