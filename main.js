@@ -66,7 +66,7 @@ async function loadModels() {
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ server, path: process.env.SUBPATH || "/" });
 
 if(process.argv.includes("maintenance")) {
 	app.use((req, res, next) => {
