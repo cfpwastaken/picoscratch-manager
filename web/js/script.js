@@ -46,7 +46,7 @@ ws.addEventListener("message", async (msg) => {
 		await loadSchool();
 		// $("#nav").lastChild.click();
 		// click the 2nd nav item
-		navItems[1].click();
+		//navItems[1].click();
 	} else if(packet.type == "addTeacher") {
 		if(packet.error) {
 			alert(result.error);
