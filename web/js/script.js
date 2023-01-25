@@ -132,7 +132,7 @@ ws.addEventListener("message", async (msg) => {
 })
 
 async function loginSchoolcode(code) {
-	const school = await fetch("/api/schoolcode/" + code).then(res => res.json());
+	const school = await fetch("api/schoolcode/" + code).then(res => res.json());
 	if(school.error) {
 		$("#login-spinner").style.display = "none";
 		$("#code").disabled = false;
