@@ -6,7 +6,7 @@ const $$ = document.querySelectorAll.bind(document);
 let uuid;
 let school;
 let role;
-let ws = new WebSocket("ws://" + location.host);
+let ws = new WebSocket((location.protocol == "http" ? "ws://" : "wss://") + location.host);
 window.ws = ws;
 let schoolCode;
 let username;
@@ -46,7 +46,7 @@ ws.addEventListener("message", async (msg) => {
 		await loadSchool();
 		// $("#nav").lastChild.click();
 		// click the 2nd nav item
-		//navItems[1].click();
+		//navItems[1].click(); "picoscratch", "picoscratch", "Passwort#0000"
 	} else if(packet.type == "addTeacher") {
 		if(packet.error) {
 			alert(result.error);
