@@ -11,6 +11,7 @@ import { Student } from "./model/student.js";
 import { Room } from "./model/room.js";
 import { readFile } from "fs/promises";
 import { Connection } from "./connection.js";
+import { Support } from "./model/support.js";
 const __dirname = new URL(".", import.meta.url).pathname;
 
 export const sql = new Sequelize(process.env.MYSQL_DB || "picoscratch", process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
@@ -34,6 +35,7 @@ async function loadModels() {
 	Course(sql);
 	Student(sql);
 	Room(sql);
+	Support(sql);
 
 	// School <-> Teacher
 	School.hasMany(Teacher)
@@ -68,9 +70,14 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: process.env.SUBPATH || "/" });
 
+app.use((req, res, next) => {
+	if(req.url == "/favicon.ico") return res.sendFile("web/favicon.ico", { root: __dirname });
+	next();
+});
+
 if(process.argv.includes("maintenance")) {
 	app.use((req, res, next) => {
-		return res.status(500).sendFile("web/maintenance.html", { root: __dirname });
+		return res.status(503).sendFile("web/maintenance.html", { root: __dirname });
 	})
 }
 
@@ -112,11 +119,10 @@ app.get("/api/schoolcode/:code", async (req, res) => {
 	res.send({name: s.name, uuid: s.uuid, lang: s.lang});
 })
 
-app.get("/au", (req, res) => {
-	setTimeout(() => {
-		throw new Error("Test");
-	}, 1000);
-	res.send("OK");
+app.post("/api/support", async (req, res) => {
+	if(!req.body.data) return res.status(400).send({error: "Missing data"});
+	const support = await Support.create({ data: JSON.stringify(req.body.data), id: randomCode() });
+	res.send({id: support.id});
 })
 
 // app.post("/api/getSchool/:uuid", async (req, res) => {

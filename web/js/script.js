@@ -6,7 +6,7 @@ const $$ = document.querySelectorAll.bind(document);
 let uuid;
 let school;
 let role;
-let ws = new WebSocket((location.protocol == "http" ? "ws://" : "wss://") + location.host + location.pathname);
+let ws = new WebSocket((location.protocol == "http:" ? "ws://" : "wss://") + location.host + location.pathname);
 window.ws = ws;
 let schoolCode;
 let username;
