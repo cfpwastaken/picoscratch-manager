@@ -164,9 +164,12 @@ export class Connection {
 					course.isRunning = true;
 					await course.save();
 					for(const logged of loggedIn) {
+						console.log("LOGGED");
 						if(logged.clientType == "student") {
-							if(!logged.room.course) continue;
-							if(!logged.room.course.uuid == this.course.uuid) continue;
+							if(!logged.room) continue;
+							const c = await logged.room.getCourse();
+							if(!c) continue;
+							if(!c.uuid == c.uuid) continue;
 							logged.ws.send(JSON.stringify({type: "startCourse"}));
 						} else if(logged.clientType == "teacher") {
 							if(logged.cid == this.cid) continue;
@@ -190,8 +193,10 @@ export class Connection {
 					await course.save();
 					for(const logged of loggedIn) {
 						if(logged.clientType == "student") {
-							if(!logged.room.course) continue;
-							if(!logged.room.course.uuid == this.course.uuid) continue;
+							if(!logged.room) continue;
+							const c = await logged.room.getCourse();
+							if(!c) continue;
+							if(!c.uuid == c.uuid) continue;
 							logged.ws.send(JSON.stringify({type: "stopCourse"}));
 						} else if(logged.clientType == "teacher") {
 							if(logged.cid == this.cid) continue;
