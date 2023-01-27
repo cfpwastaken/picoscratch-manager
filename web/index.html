@@ -4,151 +4,68 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>PicoScratch Manager</title>
-	<link rel="stylesheet" href="css/font.css">
-	<link rel="stylesheet" href="css/spinner.css">
-	<link rel="stylesheet" href="css/dialog.css">
-	<link rel="stylesheet" href="css/main.css">
-	<script src="js/script.js" type="module" defer></script>
+	<title>PicoScratch</title>
+	<link rel="stylesheet" href="css/ui.css">
+	<script src="js/script.js" defer></script>
+	<style>
+		@keyframes scaleIn {
+			from {
+				transform: scale(0);
+			}
+			to {
+				transform: scale(1);
+			}
+		}
+	</style>
 </head>
-<body>
-	<div id="rotateScreen">
-		<h1>PicoScratch Manager</h1>
-		<h3>Das wird so nix. PicoScratch Manager unterstützt Mobile Geräte noch nicht.</h3>
-		<h3>Versuch dein Gerät zu drehen oder noch besser, nutze einen Computer.</h3>
-	</div>
-	<div id="darken" style="z-index: 999; display: none;">
-		<div class="dialog box" id="new-teacher-dialog" style="display: none;">
-			<h2>Neuen Lehrer hinzufügen</h2>
-			<input id="teacher-name" type="text" placeholder="Max Mustermann" style="margin: 5px;">
-			<input id="teacher-password" type="password" placeholder="Passwort" style="margin-bottom: 5px;">
-			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-teacher">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-teacher">OK</button>
-			</div>
-		</div>
-		<div class="dialog box" id="new-course-dialog" style="display: none;">
-			<h2>Neuen Kurs hinzufügen</h2>
-			<input id="course-name" type="text" placeholder="Programmier AG" style="margin: 5px;">
-			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-course">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-course">OK</button>
-			</div>
-		</div>
-		<div class="dialog box" id="new-room-dialog" style="display: none;">
-			<h2>Neuen Raum hinzufügen</h2>
-			<input id="room-name" type="text" placeholder="PC Raum" style="margin: 5px;">
-			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-room">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-room">OK</button>
-			</div>
+<body style="display: flex; align-items: center; flex-direction: column; gap: 15px; overflow-x: hidden;">
+	<div class="dialogs" style="position: fixed; display: flex; align-items: center; justify-content: center; height: 100vh; z-index: 50;">
+		<div id="download-dialog" style="display: none; text-align: center; background-color: #1d1d1d; outline: rgba(8, 8, 8, 0.7); outline-style: solid; outline-width: 1000px; border-radius: 10px; padding: 15px; animation: scaleIn 500ms ease forwards;">
+			<h2 style="margin-top: 0;">Download started!</h2>
+			<p>Click the downloaded file, and PicoScratch will install automatically.</p>
+			<p>You can use the following SHA512 checksum to verify the download:<br><code id="sha512-checksum"></code></p>
+			<button id="close-download-dialog">Close</button>
 		</div>
 	</div>
-	<div id="login">
-		<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
-		<h2 style="margin: 5px;">Schulcode</h2>
-		<div id="schoolcode-container">
-			<input type="text" id="code" maxlength="7">
-		</div>
-		<div class="progress-ring spinner-indeter" id="login-spinner" style="display: none; margin-top: 10px; width: 80px; height: 80px;">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="ring">
-				<circle class="dynamic" cx="50%" cy="50%" r="43.75%" style="stroke: #40c340"></circle>
-			</svg>
+	<img src="webimg/blob.png" width="30%" style="position: absolute; left: -50px; top: -50px; z-index: -1; rotate: -43deg;">
+	<img src="webimg/line.png" width="30%" style="position: absolute; right: -50px; top: -50px; z-index: -1;">
+	<img src="webimg/BG.svg" width="100%" style="position: absolute; bottom: 0px; z-index: -1;">
+
+	<img src="webimg/picoscratch-large.png" style="width: 50%; border-radius: 10px;">
+	<div style="backdrop-filter: blur(15px); background: rgb(29, 29, 29, 0.8); width: 90%; display: flex; align-items: center; flex-direction: column; border-radius: 15px; border-color: #2e2e2e; border-style: solid; border-width: 2px;">
+		<h2 style="margin: 0; margin-top: 5px; margin-bottom: 5px;">Download</h2>
+		<div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; gap: 0px; grid-template-areas: '. .'; margin-bottom: 10px;">
+			<div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+				<img src="webimg/win.svg" style="width: 30%; z-index: 3;">
+				<div>
+					<a>portable</a>
+					<a>installer</a>
+				</div>
+			</div>
+			<div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+				<img src="webimg/linux.png" style="width: 22%;">
+				<div>
+					<a>AppImage</a>
+					<a>deb</a>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div id="login-user" style="display: none;">
-		<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
-		<h2 style="margin: 5px;" id="login-schoolname"></h2>
-		<input id="username" style="font-size: 1.8rem; margin-bottom: 5px;" type="text" placeholder="Nutzername">
-		<input id="password" style="font-size: 1.8rem; margin-bottom: 5px;" type="password" placeholder="Passwort">
-		<button style="font-size: 1.4rem; color: white;" id="login-user-btn">Anmelden</button>
+	<div style="backdrop-filter: blur(15px); background-color: rgb(29, 29, 29, 0.8); width: 90%; display: flex; align-items: center; flex-direction: column; border-radius: 15px; border-color: #2e2e2e; border-style: solid; border-width: 2px; gap: 10px; padding-bottom: 10px;">
+		<h2 style="margin: 0; margin-top: 5px; margin-bottom: 5px;">PicoScratch Learn</h2>
+		<input type="text" placeholder="zA1vHZ5" style="text-align: center;" id="learn-id" maxlength="7">
+		<button id="learn-download">Download</button>
+		<a href="manager/"><button>Manager</button></a>
+		<a style="cursor: pointer;" id="register">Register your School</a>
 	</div>
-	<div id="dashboard" style="display: none;" class="loading">
-		<div id="title" style="display: flex;">
-			<div id="school">
-				<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
-				<h2 style="margin: 5px;" id="schoolname">FESH Gesamtschule</h2>
-			</div>
-			<div id="user" style="margin-left: auto; text-align: right;">
-				<h2 id="dashboard-username" style="margin: 5px; margin-bottom: 0;">Admin</h2>
-				<h3 id="dashboard-role" style="margin: 5px;">Admin</h3>
-			</div>
-		</div>
-		<div id="dashboard-container">
-			<div id="nav">
-			</div>
-			<div id="content">
-				<div id="selectsomething">
-					<h2 style="font-size: 1.9rem; color: #acacac;">Wähle eine Option in der linken Seite aus</h2>
-				</div>
-				<div id="teachers" class="itemlist" style="display: none;">
-					<div class="box middle" id="addteacher">
-						<button><svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.883 3.007 12 3a1 1 0 0 1 .993.883L13 4v7h7a1 1 0 0 1 .993.883L21 12a1 1 0 0 1-.883.993L20 13h-7v7a1 1 0 0 1-.883.993L12 21a1 1 0 0 1-.993-.883L11 20v-7H4a1 1 0 0 1-.993-.883L3 12a1 1 0 0 1 .883-.993L4 11h7V4a1 1 0 0 1 .883-.993L12 3l-.117.007Z" fill="#ffffff"/></svg></button>
-					</div>
-				</div>
-				<div id="rooms" class="itemlist" style="display: none;">
-					<div class="box middle" id="addroom">
-						<button><svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.883 3.007 12 3a1 1 0 0 1 .993.883L13 4v7h7a1 1 0 0 1 .993.883L21 12a1 1 0 0 1-.883.993L20 13h-7v7a1 1 0 0 1-.883.993L12 21a1 1 0 0 1-.993-.883L11 20v-7H4a1 1 0 0 1-.993-.883L3 12a1 1 0 0 1 .883-.993L4 11h7V4a1 1 0 0 1 .883-.993L12 3l-.117.007Z" fill="#ffffff"/></svg></button>
-					</div>
-				</div>
-				<div id="courses" class="itemlist" style="display: none;">
-					<div class="box middle" id="addcourse">
-						<button><svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.883 3.007 12 3a1 1 0 0 1 .993.883L13 4v7h7a1 1 0 0 1 .993.883L21 12a1 1 0 0 1-.883.993L20 13h-7v7a1 1 0 0 1-.883.993L12 21a1 1 0 0 1-.993-.883L11 20v-7H4a1 1 0 0 1-.993-.883L3 12a1 1 0 0 1 .883-.993L4 11h7V4a1 1 0 0 1 .883-.993L12 3l-.117.007Z" fill="#ffffff"/></svg></button>
-					</div>
-				</div>
-				<div id="course" style="display: none;" class="itemlist">
-					<div class="box">
-						<h2 style="margin: 0; font-size: 1.9rem;">Steuerung</h2>
-						<div id="controlbuttons">
-							<button id="start">Start</button>
-							<button id="trafficlight" disabled>
-								<div class="traffic trafficOff" id="traffic-red"></div>
-								<div class="traffic trafficOff" id="traffic-green"></div>
-							</button>
-							<button id="stop">Stop</button>
-						</div>
-					</div>
-					<div class="box">
-						<h2 style="margin: 0; font-size: 1.9rem;">Abwesende</h2>
-						<p>Noch nicht verfügbar.</p>
-						<!-- <div id="absents">
-							<div class="absent">
-								<svg width="35px" height="35px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.754 14a2.249 2.249 0 0 1 2.25 2.249v.918a2.75 2.75 0 0 1-.513 1.599C17.945 20.929 15.42 22 12 22c-3.422 0-5.945-1.072-7.487-3.237a2.75 2.75 0 0 1-.51-1.595v-.92a2.249 2.249 0 0 1 2.249-2.25h11.501ZM12 2.004a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" fill="#fff"/></svg>
-								<h3>Max</h3>
-							</div>
-							<div class="absent">
-								<svg width="35px" height="35px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.754 14a2.249 2.249 0 0 1 2.25 2.249v.918a2.75 2.75 0 0 1-.513 1.599C17.945 20.929 15.42 22 12 22c-3.422 0-5.945-1.072-7.487-3.237a2.75 2.75 0 0 1-.51-1.595v-.92a2.249 2.249 0 0 1 2.249-2.25h11.501ZM12 2.004a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" fill="#fff"/></svg>
-								<h3>Felix</h3>
-							</div>
-						</div> -->
-					</div>
-					<!-- <div class="box">
-						<h2 style="margin: 0; font-size: 1.9rem;">Kurs</h2>
-						<div id="actions">
-							<button style="margin-left: auto;"><svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"></path></svg></button>
-						</div>
-					</div> -->
-					<div class="box" id="leaderboard">
-						<h2>Rangliste</h2>
-						<!-- Table:
-						Platz - Name (takes rest of space) - Übung - Quiz % - Aktionen -->
-						<table>
-							<tr>
-								<th>Platz</th>
-								<th>Name</th>
-								<th>Übung</th>
-								<th>Quiz %</th>
-								<th>Aktionen</th>
-							</tr>
-							<tr>
-								<td>1</td>
-								<td>Max</td>
-								<td>1</td>
-								<td>100%</td>
-								<td>LOL</td>
-							</tr>
-						</table>
-					</div>
+	<div style="backdrop-filter: blur(15px); background-color: rgb(29, 29, 29, 0.8); width: 90%; display: flex; align-items: center; flex-direction: column; border-radius: 15px; border-color: #2e2e2e; border-style: solid; border-width: 2px;">
+		<h2 style="margin: 0; margin-top: 5px; margin-bottom: 5px;">Source Code</h2>
+		<div style="display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; gap: 0px; grid-template-areas: '.'; margin-bottom: 10px;">
+			<div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+				<img src="webimg/gh.svg" style="width: 50%; margin-bottom: 5px;">
+				<div>
+					<a href="https://github.com/picoscratch/picoscratch">PicoScratch</a>
+					<a href="https://github.com/picoscratch/picoscratch-blocks">Blocks</a>
 				</div>
 			</div>
 		</div>

@@ -150,6 +150,10 @@ app.post("/api/support", async (req, res) => {
 // 	res.send(t);
 // })
 
+app.get("*", (req, res) => {
+	res.sendFile("web/404.html", { root: __dirname });
+})
+
 export const loggedIn = [];
 
 wss.addListener("connection", (ws) => {
