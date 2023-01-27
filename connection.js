@@ -312,6 +312,10 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "login", success: false, error: "Missing name"}));
 						return;
 					}
+					if(!this.room) {
+						this.ws.send(JSON.stringify({type: "login", success: false, error: "You have not joined a room yet"}));
+						return;
+					}
 					this.room.reload();
 					const course = await this.room.getCourse();
 					if(course == null) {
