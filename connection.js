@@ -410,10 +410,10 @@ export class Connection {
 							const c = await logged.room.getCourse();
 							if(!c) continue;
 							if(!c.uuid == c.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", ...courseLeaderboardJSON(await student.getCourse())}));
+							logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
 						} else if(logged.clientType == "teacher") {
 							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", course, ...courseLeaderboardJSON(await student.getCourse())}));
+							logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
 						}
 					}
 					ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
