@@ -11,8 +11,11 @@ window.ws = ws;
 let schoolCode;
 let username;
 let navItems;
-const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course")];
+const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings")];
 let selectedCourse;
+
+await loginSchoolcode("demopsm");
+await loginSchool(uuid, "admin", "secret");
 
 function hasJsonStructure(str) {
 	if(typeof str !== "string") return false;
@@ -233,6 +236,25 @@ async function loadSchool() {
 	for(const room of school.rooms) {
 		createRoom(room);
 	}
+	if(role == "admin") {
+		const settingsEl = document.createElement("h3");
+		settingsEl.innerText = "Einstellungen";
+		settingsEl.style.marginTop = "auto";
+		settingsEl.id = "settings-nav";
+		settingsEl.addEventListener("click", () => {
+			for(const item of navItems) {
+				item.classList.remove("active");
+			}
+			settingsEl.classList.add("active");
+			for(const item of contentItems) {
+				item.style.display = "none";
+			}
+			selectedCourse = null;
+			$("#settings").style.display = "";
+		});
+		navItems.push(settingsEl);
+		$("#nav").appendChild(settingsEl);
+	}
 
 	$("#dashboard").classList.remove("loading");
 }
@@ -252,7 +274,11 @@ function createCourseNavItem(course) {
 	img.src = "../arrow.svg";
 	h3.appendChild(img);
 	h3.appendChild(document.createTextNode(" " + course.name));
-	$("#nav").appendChild(h3);
+	if($("#settings-nav")) {
+		$("#nav").insertBefore(h3, $("#settings-nav"))
+	} else {
+		$("#nav").appendChild(h3);
+	}
 	h3.addEventListener("click", () => {
 		for(const item of navItems) {
 			item.classList.remove("active");

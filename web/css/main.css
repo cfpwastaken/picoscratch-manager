@@ -33,7 +33,7 @@ html::after {
 	}
 }
 
-input,
+input:not(input[type=checkbox]),
 select {
 	background-color: rgba(29, 29, 29, 0.5);
 	background-image: url(../noise.png);
@@ -56,6 +56,10 @@ select {
 input.error {
 	background-color: rgba(195, 64, 64, 0.5);
 	border-color: rgba(245, 80, 80, 0.8);
+}
+
+input[type=checkbox] {
+	transform: scale(2);
 }
 
 .dialog input {
