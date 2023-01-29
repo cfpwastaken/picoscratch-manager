@@ -1,4 +1,5 @@
 import { Dialog } from "./dialog.js";
+import { setLang, translate } from "./lang.js";
 
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
@@ -14,8 +15,9 @@ let navItems;
 const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings")];
 let selectedCourse;
 
+setLang("en");
 await loginSchoolcode("demopsm");
-await loginSchool(uuid, "admin", "secret");
+// await loginSchool(uuid, "admin", "secret");
 
 function hasJsonStructure(str) {
 	if(typeof str !== "string") return false;
@@ -95,6 +97,9 @@ ws.addEventListener("message", async (msg) => {
 			alert(packet.error);
 			return;
 		}
+		if(!packet.uuid) return;
+		if(packet.course) $("[data-room=\"" + packet.uuid + "\"] select").value = packet.course.uuid;
+		else $("[data-room=\"" + packet.uuid + "\"] select").value = "nocourse";
 	} else if(packet.type == "startCourse") {
 		if(packet.error) {
 			alert(packet.error);
@@ -131,6 +136,17 @@ ws.addEventListener("message", async (msg) => {
 		console.log(packet);
 	} else if(packet.type == "setLevel") {
 		console.log(packet);
+	} else if(packet.type == "setChannel") {
+		$("#setting-channel").value = packet.channel;
+	} else if(packet.type == "setLang") {
+		$("#setting-lang").value = packet.lang;
+	} else if(packet.type == "renameCourse") {
+		if(packet.error) {
+			alert(packet.error);
+			return;
+		}
+		$("[data-course-item=\"" + packet.uuid + "\"] h2").innerText = packet.name;
+		$("[data-course-nav=\"" + packet.uuid + "\"]").childNodes[1].nodeValue = " " + packet.name;
 	}
 })
 
@@ -148,6 +164,7 @@ async function loginSchoolcode(code) {
 	$("#login-schoolname").innerText = school.name;
 	uuid = school.uuid;
 	schoolCode = code;
+	setLang(school.lang)
 }
 
 async function loginSchool(uuid, user, password) {
@@ -168,14 +185,15 @@ async function loadSchool() {
 	$("#dashboard").style.display = "";
 
 	$("#schoolname").innerText = school.name;
-	$("#dashboard-username").innerText = username.toLowerCase() == "admin" ? "Admin" : school.teachers.find(t => t.name.toLowerCase() === username.toLowerCase()).name;
-	role = $("#dashboard-username").innerText.toLowerCase() == "admin" ? "Admin" : "Lehrer";
-	$("#dashboard-role").innerText = role;
+	username = username.toLowerCase() == "admin" ? "Admin" : school.teachers.find(t => t.name.toLowerCase() === username.toLowerCase()).name;
+	$("#dashboard-username").innerText = username;
+	role = username.toLowerCase() == "admin" ? "admin" : "teacher";
+	$("#dashboard-role").innerText = translate(role);
 	role = role.toLowerCase();
 
 	if(role == "admin") {
 		const teachersEl = document.createElement("h3");
-		teachersEl.innerText = "Lehrer";
+		teachersEl.innerText = translate("teachers");
 		teachersEl.addEventListener("click", () => {
 			for(const item of navItems) {
 				item.classList.remove("active");
@@ -191,7 +209,7 @@ async function loadSchool() {
 		$("#nav").appendChild(teachersEl);
 	}
 	const roomsEl = document.createElement("h3");
-	roomsEl.innerText = "Räume";
+	roomsEl.innerText = translate("rooms");
 	roomsEl.addEventListener("click", () => {
 		for(const item of navItems) {
 			item.classList.remove("active");
@@ -210,7 +228,7 @@ async function loadSchool() {
 	$("#nav").appendChild(roomsEl);
 
 	const coursesEl = document.createElement("h3");
-	coursesEl.innerText = "Kurse";
+	coursesEl.innerText = translate("courses");
 	if(role == "admin") {
 		coursesEl.addEventListener("click", () => {
 			for(const item of navItems) {
@@ -238,7 +256,7 @@ async function loadSchool() {
 	}
 	if(role == "admin") {
 		const settingsEl = document.createElement("h3");
-		settingsEl.innerText = "Einstellungen";
+		settingsEl.innerText = translate("settings");
 		settingsEl.style.marginTop = "auto";
 		settingsEl.id = "settings-nav";
 		settingsEl.addEventListener("click", () => {
@@ -255,6 +273,18 @@ async function loadSchool() {
 		navItems.push(settingsEl);
 		$("#nav").appendChild(settingsEl);
 	}
+
+	$("#setting-lang").value = school.lang;
+	$("#setting-lang").addEventListener("change", () => {
+		ws.send(JSON.stringify({ type: "setLang", lang: $("#setting-lang").value }));
+		requestAnimationFrame(() => {
+			alert(translate("reload-to-apply-new-lang"))
+		})
+	});
+	$("#setting-channel").value = school.channel;
+	$("#setting-channel").addEventListener("change", () => {
+		ws.send(JSON.stringify({ type: "setChannel", channel: $("#setting-channel").value }));
+	});
 
 	$("#dashboard").classList.remove("loading");
 }
@@ -311,12 +341,21 @@ function createCourseItem(course) {
 	const actions = document.createElement("div");
 	actions.id = "actions";
 	div.appendChild(actions);
-	const button = document.createElement("button");
-	button.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"/></svg>';
-	button.addEventListener("click", () => {
+	const renameButton = document.createElement("button");
+	renameButton.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.75 2h3.998a.75.75 0 0 1 .102 1.493l-.102.007H12.5v17h1.246a.75.75 0 0 1 .743.648l.007.102a.75.75 0 0 1-.648.743l-.102.007H9.75a.75.75 0 0 1-.102-1.493l.102-.007h1.249v-17H9.75a.75.75 0 0 1-.743-.648L9 2.75a.75.75 0 0 1 .648-.743L9.75 2Zm8.496 2.997a3.253 3.253 0 0 1 3.25 3.25l.004 7.504a3.249 3.249 0 0 1-3.064 3.246l-.186.005h-4.745V4.996h4.74Zm-8.249 0L9.992 19H5.25A3.25 3.25 0 0 1 2 15.751V8.247a3.25 3.25 0 0 1 3.25-3.25h4.747Z" fill="#fff"/></svg>';
+	renameButton.addEventListener("click", () => {
+		const newName = prompt(translate("new-name"), h2.innerText);
+		if(newName) {
+			ws.send(JSON.stringify({type: "renameCourse", uuid: course.uuid, name: newName}));
+		}
+	});
+	actions.appendChild(renameButton);
+	const deleteButton = document.createElement("button");
+	deleteButton.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"/></svg>';
+	deleteButton.addEventListener("click", () => {
 		ws.send(JSON.stringify({ type: "deleteCourse", uuid: course.uuid }));
 	});
-	actions.appendChild(button);
+	actions.appendChild(deleteButton);
 	$("#courses").insertBefore(div, $("#addcourse"));
 }
 
@@ -330,12 +369,21 @@ function createTeacher(teacher) {
 	const actions = document.createElement("div");
 	actions.id = "actions";
 	div.appendChild(actions);
-	const button = document.createElement("button");
-	button.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"/></svg>';
-	button.addEventListener("click", () => {
+	const changePasswordButton = document.createElement("button");
+	changePasswordButton.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.25 5A3.25 3.25 0 0 0 2 8.25v7.5A3.25 3.25 0 0 0 5.25 19h13.5A3.25 3.25 0 0 0 22 15.75v-7.5A3.25 3.25 0 0 0 18.75 5H5.25Zm1.03 5.22.72.72.72-.72a.75.75 0 1 1 1.06 1.06l-.719.72.72.718A.75.75 0 1 1 7.72 13.78L7 13.06l-.72.72a.75.75 0 0 1-1.06-1.06l.72-.72-.72-.72a.75.75 0 0 1 1.06-1.06Zm5.5 0 .72.72.72-.72a.75.75 0 1 1 1.06 1.06l-.719.72.72.718a.75.75 0 1 1-1.061 1.061l-.72-.719-.72.72a.75.75 0 1 1-1.06-1.06l.72-.72-.72-.72a.75.75 0 0 1 1.06-1.06Zm3.97 4.03a.75.75 0 0 1 .75-.75h1.75a.75.75 0 0 1 0 1.5H16.5a.75.75 0 0 1-.75-.75Z" fill="#fff"/></svg>';
+	changePasswordButton.addEventListener("click", () => {
+		const newPw = prompt(translate("new-password"));
+		if(newPw) {
+			ws.send(JSON.stringify({ type: "changeTeacherPassword", uuid: teacher.uuid, password: newPw }));
+		}
+	});
+	actions.appendChild(changePasswordButton);
+	const deleteButton = document.createElement("button");
+	deleteButton.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"/></svg>';
+	deleteButton.addEventListener("click", () => {
 		ws.send(JSON.stringify({ type: "deleteTeacher", uuid: teacher.uuid }));
 	})
-	actions.appendChild(button);
+	actions.appendChild(deleteButton);
 	$("#teachers").insertBefore(div, $("#addteacher"));
 }
 
@@ -349,7 +397,7 @@ function createRoom(room) {
 	div.appendChild(h2);
 	const select = document.createElement("select");
 	const option = document.createElement("option");
-	option.innerText = "Kein Kurs";
+	option.innerText = translate("no-course");
 	option.value = "nocourse";
 	select.appendChild(option);
 	select.addEventListener("change", (e) => {
@@ -378,65 +426,91 @@ function createRoom(room) {
 }
 
 function renderLeaderboard(leaderboard) {
+	console.log(leaderboard);
 	$("#leaderboard table").innerHTML = "";
 	const tr = document.createElement("tr");
 	const th = document.createElement("th");
-	th.innerText = "Platz";
+	th.innerText = translate("place");
 	tr.appendChild(th);
 	const th2 = document.createElement("th");
-	th2.innerText = "Name";
+	th2.innerText = translate("name");
 	tr.appendChild(th2);
 	const th3 = document.createElement("th");
-	th3.innerText = "Übung";
+	th3.innerText = translate("excercise");
 	tr.appendChild(th3);
 	const th4 = document.createElement("th");
-	th4.innerText = "Quiz %";
+	th4.innerText = translate("quizpercent");
 	tr.appendChild(th4);
 	const th5 = document.createElement("th");
-	th5.innerText = "Aktionen";
+	th5.innerText = translate("actions");
 	tr.appendChild(th5);
 	$("#leaderboard table").appendChild(tr);
 	// for(const user of school.users) {
 	for(let i = 0; i < leaderboard.length; i++) {
 		const student = leaderboard[i];
 		const tr = document.createElement("tr");
+
 		const place = document.createElement("td");
 		place.innerText = i + 1;
 		tr.appendChild(place);
+
 		const name = document.createElement("td");
-		name.innerText = student.name;
+
+		const nameWrapper = document.createElement("div");
+		nameWrapper.style.display = "flex";
+		nameWrapper.style.alignItems = "center";
+		nameWrapper.style.gap = "5px";
+		nameWrapper.style.justifyContent = "center";
+		name.appendChild(nameWrapper);
+
+		const statusIcon = document.createElement("div");
+		statusIcon.classList.add("statusicon");
+		statusIcon.classList.add("status-" + student.status);
+		nameWrapper.appendChild(statusIcon);
+
+		const nameSpan = document.createElement("span");
+		nameSpan.innerText = student.name;
+		nameWrapper.appendChild(nameSpan);
+
 		tr.appendChild(name);
+
 		const exercise = document.createElement("td");
 		exercise.innerText = student.level;
 		tr.appendChild(exercise);
+
 		const quiz = document.createElement("td");
 		quiz.innerText = student.percentage + "%";
 		tr.appendChild(quiz);
+
 		const actions = document.createElement("td");
 		actions.id = "leaderboardactions";
+
 		const kickAction = document.createElement("button");
 		kickAction.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 17.5a6.47 6.47 0 0 1 1.022-3.5h-7.77a2.249 2.249 0 0 0-2.249 2.25v.919c0 .572.179 1.13.51 1.596C4.057 20.929 6.58 22 10 22c.931 0 1.796-.08 2.592-.238A6.475 6.475 0 0 1 11 17.5ZM10 2.005a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" fill="#ffffff"/><path d="M23 17.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-4.647-2.853a.5.5 0 0 0-.707.707L19.293 17H15a.5.5 0 1 0 0 1h4.293l-1.647 1.647a.5.5 0 0 0 .707.707l2.5-2.5a.497.497 0 0 0 .147-.345V17.5a.498.498 0 0 0-.15-.357l-2.497-2.496Z" fill="#ffffff"/></svg>`;
 		kickAction.addEventListener("click", () => {
 			ws.send(JSON.stringify({ type: "kick", uuid: student.uuid }));
 		});
-		kickAction.title = "Kick " + student.name;
+		kickAction.title = translate("kickaction").replaceAll("%s", student.name);
 		actions.appendChild(kickAction);
+
 		const deleteAction = document.createElement("button");
 		deleteAction.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#A03030"/></svg>`;
 		deleteAction.addEventListener("dblclick", () => {
 			ws.send(JSON.stringify({ type: "delete", uuid: student.uuid, courseUUID: selectedCourse.uuid }));
 		});
-		deleteAction.title = "Delete " + student.name;
+		deleteAction.title = translate("deleteaction").replaceAll("%s", student.name);
 		actions.appendChild(deleteAction);
+
 		const setLevelAction = document.createElement("button");
 		setLevelAction.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.975 9.689a1 1 0 1 1-1.45-1.378l4.75-5a1 1 0 0 1 1.45 0l4.75 5a1 1 0 1 1-1.45 1.378L13 6.505v10.99l3.025-3.184a1 1 0 1 1 1.45 1.378l-4.75 5a1 1 0 0 1-1.45 0l-4.75-5a1 1 0 1 1 1.45-1.378L11 17.495V6.505L7.975 9.689Z" fill="#ffffff"/></svg>`;
 		setLevelAction.addEventListener("click", () => {
-			const level = prompt("Set level for " + student.name, student.level);
+			const level = prompt(translate("setlevelaction").replaceAll("%s", student.name), student.level);
 			if(level == null) return;
 			ws.send(JSON.stringify({ type: "setLevel", uuid: student.uuid, level, courseUUID: selectedCourse.uuid }));
 		});
-		setLevelAction.title = "Set level for " + student.name;
+		setLevelAction.title = translate("setlevelaction").replaceAll("%s", student.name);
 		actions.appendChild(setLevelAction);
+
 		tr.appendChild(actions);
 		$("#leaderboard table").appendChild(tr);
 	}

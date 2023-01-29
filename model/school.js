@@ -67,6 +67,11 @@ export let School = (sql) => {
 			type: DataTypes.STRING,
 			allowNull: false,
 			defaultValue: "en"
+		},
+		channel: {
+			type: DataTypes.STRING,
+			allowNull: false,
+			defaultValue: "latest"
 		}
 	}, {
 		paranoid: true

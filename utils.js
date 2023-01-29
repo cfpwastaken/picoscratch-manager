@@ -1,5 +1,5 @@
 import { compare } from "bcrypt";
-import { tasks } from "./main.js";
+import { loggedIn, tasks } from "./main.js";
 import { Course } from "./model/course.js";
 import { Room } from "./model/room.js";
 import { School } from "./model/school.js";
@@ -46,7 +46,8 @@ export async function courseLeaderboardJSON(course) {
 			xp: ((s.level - 1) * 1357) + (s.correctqs * 136),
 			achievements: s.achievements,
 			achievementdata: s.achievementdata,
-			uuid: s.uuid
+			uuid: s.uuid,
+			status: loggedIn.find(l => l.uuid == s.uuid) ? (loggedIn.find(l => l.uuid == s.uuid).idle ? "idle" : "online") : "offline"
 		}
 	});
 	leaderboard.sort((a, b) => b.xp - a.xp);

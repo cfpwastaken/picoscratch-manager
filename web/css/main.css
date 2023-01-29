@@ -222,6 +222,8 @@ html::after {
 
 .itemlist .box #actions {
 	margin-left: auto;
+	display: flex;
+	gap: 10px;
 }
 
 button {
@@ -366,4 +368,22 @@ th, td {
 
 #leaderboardactions button:last-of-type {
 	margin-right: 0;
+}
+
+.statusicon {
+	border-radius: 100%;
+	width: 20px;
+	height: 20px;
+}
+
+.status-offline {
+	background-color: #C34040;
+}
+
+.status-online {
+	background-color: #40C340;
+}
+
+.status-idle {
+	background-color: #F5F550;
 }

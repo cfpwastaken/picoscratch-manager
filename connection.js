@@ -7,6 +7,41 @@ import { Student } from "./model/student.js";
 import { Teacher } from "./model/teacher.js";
 import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, courseLeaderboardJSON, studentLevelpath } from "./utils.js";
 
+function broadcastAdmins(school, packet, exceptCID) {
+	for(const connection of loggedIn) {
+		if(exceptCID && connection.cid == exceptCID) continue;
+		if(connection.isAdmin && connection.school.uuid == school.uuid) {
+			connection.ws.send(JSON.stringify(packet));
+		}
+	}
+}
+
+function broadcastTeachers(school, packet, exceptCID) {
+	for(const connection of loggedIn) {
+		if(connection.clientType != "teacher") continue;
+		if(exceptCID && connection.cid == exceptCID) continue;
+		if(connection.school.uuid != school.uuid) continue;
+		connection.ws.send(JSON.stringify(packet));
+	}
+}
+
+function broadcastStudentsInCourse(course, packet) {
+	for(const connection of loggedIn) {
+		if(connection.clientType != "student") continue;
+		if(!connection.room) continue;
+		const c = connection.room.getCourse();
+		if(!c) continue;
+		if(!c.uuid == course.uuid) continue;
+		connection.ws.send(JSON.stringify(packet));
+	}
+}
+
+async function resendLeaderboard(school, course) {
+	const leaderboard = await courseLeaderboardJSON(course);
+	broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard});
+	broadcastTeachers(school, {type: "leaderboard", course, leaderboard});
+}
+
 export class Connection {
 	clientType = "";
 	isAdmin = false;
@@ -16,6 +51,7 @@ export class Connection {
 	cid = uuid();
 	ws
 	uuid
+	idle
 
 	constructor(ws) {
 		this.ws = ws;
@@ -67,6 +103,7 @@ export class Connection {
 					}
 					const t = await this.school.createTeacher({name: packet.username, password: packet.password});
 					this.ws.send(JSON.stringify({type: "addTeacher", success: true, teacher: t}));
+					broadcastAdmins(this.school, {type: "addTeacher", teacher: t}, this.cid);
 				} else if(packet.type == "deleteTeacher") {
 					if(!packet.uuid) {
 						this.ws.send(JSON.stringify({type: "deleteTeacher", success: false, error: "Missing uuid"}));
@@ -80,6 +117,7 @@ export class Connection {
 					}
 					await teacher.destroy();
 					this.ws.send(JSON.stringify({type: "deleteTeacher", success: true, wasUUID: packet.uuid}));
+					broadcastAdmins(this.school, {type: "deleteTeacher", wasUUID: packet.uuid}, this.cid);
 				} else if(packet.type == "addCourse") {
 					if(!packet.name) {
 						this.ws.send(JSON.stringify({type: "addCourse", success: false, error: "Missing name"}));
@@ -87,6 +125,7 @@ export class Connection {
 					}
 					const c = await this.school.createCourse({name: packet.name});
 					this.ws.send(JSON.stringify({type: "addCourse", success: true, course: c}));
+					broadcastAdmins(this.school, {type: "addCourse", course: c}, this.cid);
 				} else if(packet.type == "deleteCourse") {
 					if(!packet.uuid) {
 						this.ws.send(JSON.stringify({type: "deleteCourse", success: false, error: "Missing uuid"}));
@@ -100,6 +139,7 @@ export class Connection {
 					}
 					await course.destroy();
 					this.ws.send(JSON.stringify({type: "deleteCourse", success: true, wasUUID: packet.uuid}));
+					broadcastAdmins(this.school, {type: "deleteCourse", wasUUID: packet.uuid}, this.cid);
 				} else if(packet.type == "addRoom") {
 					if(!packet.name) {
 						this.ws.send(JSON.stringify({type: "addRoom", success: false, error: "Missing name"}));
@@ -107,6 +147,7 @@ export class Connection {
 					}
 					const r = await this.school.createRoom({name: packet.name});
 					this.ws.send(JSON.stringify({type: "addRoom", success: true, room: r}));
+					broadcastAdmins(this.school, {type: "addRoom", room: r}, this.cid);
 				} else if(packet.type == "deleteRoom") {
 					if(!packet.uuid) {
 						this.ws.send(JSON.stringify({type: "deleteRoom", success: false, error: "Missing uuid"}));
@@ -120,6 +161,7 @@ export class Connection {
 					}
 					await room.destroy();
 					this.ws.send(JSON.stringify({type: "deleteRoom", success: true, wasUUID: packet.uuid}));
+					broadcastAdmins(this.school, {type: "deleteRoom", wasUUID: packet.uuid}, this.cid);
 				} else if(packet.type == "setLang") {
 					if(!packet.lang) {
 						this.ws.send(JSON.stringify({type: "setLang", success: false, error: "Missing lang"}));
@@ -128,6 +170,44 @@ export class Connection {
 					this.school.lang = packet.lang;
 					await this.school.save();
 					this.ws.send(JSON.stringify({type: "setLang", success: true, lang: this.school.lang}));
+					broadcastAdmins(this.school, {type: "setLang", lang: this.school.lang}, this.cid);
+				} else if(packet.type == "setChannel") {
+					if(!packet.channel) {
+						this.ws.send(JSON.stringify({type: "setChannel", success: false, error: "Missing channel"}));
+						return;
+					}
+					this.school.channel = packet.channel;
+					await this.school.save();
+					this.ws.send(JSON.stringify({type: "setChannel", success: true, channel: this.school.channel}));
+					broadcastAdmins(this.school, {type: "setChannel", channel: this.school.channel}, this.cid);
+				} else if(packet.type == "changeTeacherPassword") {
+					if(!packet.uuid || !packet.password) {
+						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Missing uuid or password"}));
+						return;
+					}
+					const t = await this.school.getTeachers();
+					const teacher = t.find(t => t.uuid == packet.uuid);
+					if(!teacher) {
+						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Teacher not found"}));
+						return;
+					}
+					teacher.password = packet.password;
+					await teacher.save();
+					this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: true, uuid: teacher.uuid}));
+				} else if(packet.type == "renameCourse") {
+					if(!packet.uuid || !packet.name) {
+						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Missing uuid or name"}));
+						return;
+					}
+					const c = await this.school.getCourses();
+					const course = c.find(c => c.uuid == packet.uuid);
+					if(!course) {
+						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Course not found"}));
+						return;
+					}
+					course.name = packet.name;
+					await course.save();
+					broadcastTeachers(this.school, {type: "renameCourse", uuid: course.uuid, name: course.name});
 				}
 			}
 			if(this.clientType == "teacher") {
@@ -150,6 +230,7 @@ export class Connection {
 					}
 					await room.setCourse(course);
 					this.ws.send(JSON.stringify({type: "setActiveCourse", success: true, course: course}));
+					broadcastTeachers(this.school, {type: "setActiveCourse", uuid: packet.uuid, course: course}, this.cid);
 				} else if(packet.type == "startCourse") {
 					if(!packet.uuid) {
 						this.ws.send(JSON.stringify({type: "startCourse", success: false, error: "Missing uuid"}));
@@ -163,19 +244,21 @@ export class Connection {
 					}
 					course.isRunning = true;
 					await course.save();
-					for(const logged of loggedIn) {
-						if(logged.clientType == "student") {
-							if(!logged.room) continue;
-							const c = await logged.room.getCourse();
-							if(!c) continue;
-							if(!c.uuid == c.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "startCourse"}));
-						} else if(logged.clientType == "teacher") {
-							if(logged.cid == this.cid) continue;
-							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "startCourse", course}));
-						}
-					}
+					// for(const logged of loggedIn) {
+					// 	if(logged.clientType == "student") {
+					// 		if(!logged.room) continue;
+					// 		const c = await logged.room.getCourse();
+					// 		if(!c) continue;
+					// 		if(!c.uuid == c.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "startCourse"}));
+					// 	} else if(logged.clientType == "teacher") {
+					// 		if(logged.cid == this.cid) continue;
+					// 		if(logged.school.uuid != this.school.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "startCourse", course}));
+					// 	}
+					// }
+					broadcastStudentsInCourse(course, {type: "startCourse"});
+					broadcastTeachers(this.school, {type: "startCourse", course}, this.cid);
 					this.ws.send(JSON.stringify({type: "startCourse", success: true, course}));
 				} else if(packet.type == "stopCourse") {
 					if(!packet.uuid) {
@@ -190,19 +273,21 @@ export class Connection {
 					}
 					course.isRunning = false;
 					await course.save();
-					for(const logged of loggedIn) {
-						if(logged.clientType == "student") {
-							if(!logged.room) continue;
-							const c = await logged.room.getCourse();
-							if(!c) continue;
-							if(!c.uuid == c.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "stopCourse"}));
-						} else if(logged.clientType == "teacher") {
-							if(logged.cid == this.cid) continue;
-							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "stopCourse", course}));
-						}
-					}
+					// for(const logged of loggedIn) {
+					// 	if(logged.clientType == "student") {
+					// 		if(!logged.room) continue;
+					// 		const c = await logged.room.getCourse();
+					// 		if(!c) continue;
+					// 		if(!c.uuid == c.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "stopCourse"}));
+					// 	} else if(logged.clientType == "teacher") {
+					// 		if(logged.cid == this.cid) continue;
+					// 		if(logged.school.uuid != this.school.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "stopCourse", course}));
+					// 	}
+					// }
+					broadcastStudentsInCourse(course, {type: "stopCourse"});
+					broadcastTeachers(this.school, {type: "stopCourse", course}, this.cid);
 					this.ws.send(JSON.stringify({type: "stopCourse", success: true, course}));
 				} else if(packet.type == "getCourseInfo") {
 					if(!packet.uuid) {
@@ -252,17 +337,20 @@ export class Connection {
 						logged.ws.close();
 					}
 					await student.destroy();
-					for(const logged of loggedIn) {
-						if(logged.clientType == "student") {
-							if(!logged.room) continue;
-							if(!logged.room.courseUuid == course.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
-						} else if(logged.clientType == "teacher") {
-							if(logged.cid == this.cid) continue;
-							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
-						}
-					}
+					// for(const logged of loggedIn) {
+					// 	if(logged.clientType == "student") {
+					// 		if(!logged.room) continue;
+					// 		if(!logged.room.courseUuid == course.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
+					// 	} else if(logged.clientType == "teacher") {
+					// 		if(logged.cid == this.cid) continue;
+					// 		if(logged.school.uuid != this.school.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
+					// 	}
+					// }
+					// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
+					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
+					await resendLeaderboard(this.school, course);
 				} else if(packet.type == "setLevel") {
 					if(!packet.uuid || !packet.courseUUID) {
 						this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Missing uuid or courseUUID"}));
@@ -284,17 +372,18 @@ export class Connection {
 					if(logged) {
 						logged.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
 					}
-					for(const logged of loggedIn) {
-						if(logged.clientType == "student") {
-							if(!logged.room) continue;
-							if(!logged.room.courseUuid == course.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
-						} else if(logged.clientType == "teacher") {
-							// if(logged.cid == this.cid) continue;
-							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
-						}
-					}
+					// for(const logged of loggedIn) {
+					// 	if(logged.clientType == "student") {
+					// 		if(!logged.room) continue;
+					// 		if(!logged.room.courseUuid == course.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
+					// 	} else if(logged.clientType == "teacher") {
+					// 		// if(logged.cid == this.cid) continue;
+					// 		if(logged.school.uuid != this.school.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
+					// 	}
+					// }
+					await resendLeaderboard(this.school, course);
 				}
 			}
 			if(this.clientType == "student") {
@@ -333,9 +422,11 @@ export class Connection {
 					}
 					this.name = student.name;
 					this.uuid = student.uuid;
+					this.idle = false;
 					this.ws.send(JSON.stringify({type: "login", success: true, student}));
 					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
 					this.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
+					await resendLeaderboard(this.school, course);
 				} else if(packet.type == "info") {
 					if(!packet.level) {
 						this.ws.send(JSON.stringify({type: "info", success: false, error: "Missing level id"}));
@@ -404,20 +495,44 @@ export class Connection {
 							await student.save();
 						}
 					}
-					for(const logged of loggedIn) {
-						if(logged.clientType == "student") {
-							if(!logged.room) continue;
-							const c = await logged.room.getCourse();
-							if(!c) continue;
-							if(!c.uuid == c.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
-						} else if(logged.clientType == "teacher") {
-							if(logged.school.uuid != this.school.uuid) continue;
-							logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
-						}
-					}
+					// for(const logged of loggedIn) {
+					// 	if(logged.clientType == "student") {
+					// 		if(!logged.room) continue;
+					// 		const c = await logged.room.getCourse();
+					// 		if(!c) continue;
+					// 		if(!c.uuid == c.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
+					// 	} else if(logged.clientType == "teacher") {
+					// 		if(logged.school.uuid != this.school.uuid) continue;
+					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
+					// 	}
+					// }
+					// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
+					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
+					await resendLeaderboard(this.school, course);
 					ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
+				} else if(packet.type == "idleStateChange") {
+					if(packet.idle === undefined) {
+						this.ws.send(JSON.stringify({type: "idleStateChange", success: false, error: "Missing idle state"}));
+						return;
+					}
+					this.idle = packet.idle;
+					console.log(this.idle);
+					const course = await this.room.getCourse();
+					console.log(course);
+					if(course == null) return;
+					console.log("A");
+					await resendLeaderboard(this.school, course);
 				}
+			}
+		});
+		this.ws.on("close", async () => {
+			loggedIn.splice(loggedIn.indexOf(this), 1);
+			if(this.clientType == "student") {
+				if(!this.room) return;
+				const course = await this.room.getCourse();
+				if(course == null) return;
+				await resendLeaderboard(this.school, course);
 			}
 		});
 	}
