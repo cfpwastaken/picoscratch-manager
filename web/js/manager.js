@@ -16,7 +16,7 @@ const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#co
 let selectedCourse;
 
 setLang("en");
-await loginSchoolcode("demopsm");
+// await loginSchoolcode("demopsm");
 // await loginSchool(uuid, "admin", "secret");
 
 function hasJsonStructure(str) {
