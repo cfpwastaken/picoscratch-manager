@@ -14,40 +14,40 @@
 </head>
 <body>
 	<div id="rotateScreen">
-		<h1>PicoScratch Manager</h1>
-		<h3>Das wird so nix. PicoScratch Manager unterstützt Mobile Geräte noch nicht.</h3>
-		<h3>Versuch dein Gerät zu drehen oder noch besser, nutze einen Computer.</h3>
+		<h1 data-lang="picoscratch-manager"></h1>
+		<h3 data-lang="rotateScreen-line1"></h3>
+		<h3 data-lang="rotateScreen-line2"></h3>
 	</div>
 	<div id="darken" style="z-index: 999; display: none;">
 		<div class="dialog box" id="new-teacher-dialog" style="display: none;">
-			<h2>Neuen Lehrer hinzufügen</h2>
-			<input id="teacher-name" type="text" placeholder="Max Mustermann" style="margin: 5px;">
-			<input id="teacher-password" type="password" placeholder="Passwort" style="margin-bottom: 5px;">
+			<h2 data-lang="addTeacher"></h2>
+			<input id="teacher-name" type="text" data-lang-placeholder="example-name" style="margin: 5px;">
+			<input id="teacher-password" type="password" data-lang-placeholder="password" style="margin-bottom: 5px;">
 			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-teacher">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-teacher">OK</button>
+				<button style="color: white; font-size: 1.4rem;" id="cancel-teacher" data-lang="cancel"></button>
+				<button style="color: white; font-size: 1.4rem;" id="submit-teacher" data-lang="ok"></button>
 			</div>
 		</div>
 		<div class="dialog box" id="new-course-dialog" style="display: none;">
-			<h2>Neuen Kurs hinzufügen</h2>
-			<input id="course-name" type="text" placeholder="Programmier AG" style="margin: 5px;">
+			<h2 data-lang="addCourse"></h2>
+			<input id="course-name" type="text" data-lang-placeholder="example-course" style="margin: 5px;">
 			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-course">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-course">OK</button>
+				<button style="color: white; font-size: 1.4rem;" id="cancel-course" data-lang="cancel"></button>
+				<button style="color: white; font-size: 1.4rem;" id="submit-course" data-lang="ok"></button>
 			</div>
 		</div>
 		<div class="dialog box" id="new-room-dialog" style="display: none;">
-			<h2>Neuen Raum hinzufügen</h2>
-			<input id="room-name" type="text" placeholder="PC Raum" style="margin: 5px;">
+			<h2 data-lang="addRoom"></h2>
+			<input id="room-name" type="text" data-lang-placeholder="example-room" style="margin: 5px;">
 			<div>
-				<button style="color: white; font-size: 1.4rem;" id="cancel-room">Abbrechen</button>
-				<button style="color: white; font-size: 1.4rem;" id="submit-room">OK</button>
+				<button style="color: white; font-size: 1.4rem;" id="cancel-room" data-lang="cancel"></button>
+				<button style="color: white; font-size: 1.4rem;" id="submit-room" data-lang="ok"></button>
 			</div>
 		</div>
 	</div>
 	<div id="login">
-		<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
-		<h2 style="margin: 5px;">Schulcode</h2>
+		<h1 style="margin: 5px; margin-bottom: 0;" data-lang="picoscratch-manager"></h1>
+		<h2 style="margin: 5px;" data-lang="schoolcode"></h2>
 		<div id="schoolcode-container">
 			<input type="text" id="code" maxlength="7">
 		</div>
@@ -58,21 +58,21 @@
 		</div>
 	</div>
 	<div id="login-user" style="display: none;">
-		<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
+		<h1 style="margin: 5px; margin-bottom: 0;" data-lang="picoscratch-manager"></h1>
 		<h2 style="margin: 5px;" id="login-schoolname"></h2>
-		<input id="username" style="font-size: 1.8rem; margin-bottom: 5px;" type="text" placeholder="Nutzername">
-		<input id="password" style="font-size: 1.8rem; margin-bottom: 5px;" type="password" placeholder="Passwort">
-		<button style="font-size: 1.4rem; color: white;" id="login-user-btn">Anmelden</button>
+		<input id="username" style="font-size: 1.8rem; margin-bottom: 5px;" type="text" data-lang-placeholder="username">
+		<input id="password" style="font-size: 1.8rem; margin-bottom: 5px;" type="password" data-lang-placeholder="password">
+		<button style="font-size: 1.4rem; color: white;" id="login-user-btn" data-lang="login"></button>
 	</div>
 	<div id="dashboard" style="display: none;" class="loading">
 		<div id="title" style="display: flex;">
 			<div id="school">
-				<h1 style="margin: 5px; margin-bottom: 0;">PicoScratch Manager</h1>
-				<h2 style="margin: 5px;" id="schoolname">FESH Gesamtschule</h2>
+				<h1 style="margin: 5px; margin-bottom: 0;" data-lang="picoscratch-manager"></h1>
+				<h2 style="margin: 5px;" id="schoolname">Some Schoolname</h2>
 			</div>
 			<div id="user" style="margin-left: auto; text-align: right;">
-				<h2 id="dashboard-username" style="margin: 5px; margin-bottom: 0;">Admin</h2>
-				<h3 id="dashboard-role" style="margin: 5px;">Admin</h3>
+				<h2 id="dashboard-username" style="margin: 5px; margin-bottom: 0;"></h2>
+				<h3 id="dashboard-role" style="margin: 5px;"></h3>
 			</div>
 		</div>
 		<div id="dashboard-container">
@@ -80,7 +80,7 @@
 			</div>
 			<div id="content">
 				<div id="selectsomething">
-					<h2 style="font-size: 1.9rem; color: #acacac;">Wähle eine Option in der linken Seite aus</h2>
+					<h2 style="font-size: 1.9rem; color: #acacac;" data-lang="selectsomething"></h2>
 				</div>
 				<div id="teachers" class="itemlist" style="display: none;">
 					<div class="box middle" id="addteacher">
@@ -99,19 +99,19 @@
 				</div>
 				<div id="course" style="display: none;" class="itemlist">
 					<div class="box">
-						<h2 style="margin: 0; font-size: 1.9rem;">Steuerung</h2>
+						<h2 style="margin: 0; font-size: 1.9rem;" data-lang="control"></h2>
 						<div id="controlbuttons">
-							<button id="start">Start</button>
+							<button id="start" data-lang="start"></button>
 							<button id="trafficlight" disabled>
 								<div class="traffic trafficOff" id="traffic-red"></div>
 								<div class="traffic trafficOff" id="traffic-green"></div>
 							</button>
-							<button id="stop">Stop</button>
+							<button id="stop" data-lang="stop"></button>
 						</div>
 					</div>
 					<div class="box">
-						<h2 style="margin: 0; font-size: 1.9rem;">Abwesende</h2>
-						<p>Noch nicht verfügbar.</p>
+						<h2 style="margin: 0; font-size: 1.9rem;" data-lang="absents"></h2>
+						<p data-lang="not-available-yet"></p>
 						<!-- <div id="absents">
 							<div class="absent">
 								<svg width="35px" height="35px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.754 14a2.249 2.249 0 0 1 2.25 2.249v.918a2.75 2.75 0 0 1-.513 1.599C17.945 20.929 15.42 22 12 22c-3.422 0-5.945-1.072-7.487-3.237a2.75 2.75 0 0 1-.51-1.595v-.92a2.249 2.249 0 0 1 2.249-2.25h11.501ZM12 2.004a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" fill="#fff"/></svg>
@@ -130,25 +130,44 @@
 						</div>
 					</div> -->
 					<div class="box" id="leaderboard">
-						<h2>Rangliste</h2>
+						<h2 data-lang="leaderboard"></h2>
 						<!-- Table:
 						Platz - Name (takes rest of space) - Übung - Quiz % - Aktionen -->
 						<table>
-							<tr>
-								<th>Platz</th>
-								<th>Name</th>
-								<th>Übung</th>
-								<th>Quiz %</th>
-								<th>Aktionen</th>
-							</tr>
-							<tr>
-								<td>1</td>
-								<td>Max</td>
-								<td>1</td>
-								<td>100%</td>
-								<td>LOL</td>
-							</tr>
 						</table>
+					</div>
+				</div>
+				<div id="settings" class="itemlist" style="display: none;">
+					<!-- <h1>Das sind die Einstellungen lol</h1> -->
+					<div class="box">
+						<h2 data-lang="general"></h2>
+						<div style="display: flex; gap: 5px; align-items: center;">
+							<h2 style="margin: 0; font-size: 1.4rem;" data-lang="language"></h2>
+							<select id="setting-lang">
+								<option value="de" selected>Deutsch</option>
+								<option value="en">English</option>
+							</select>
+						</div>
+						<div style="display: flex; gap: 5px; align-items: center;">
+							<h2 style="margin: 0; font-size: 1.4rem;" data-lang="update-channel"></h2>
+							<div data-lang-title="update-channel-info">
+								<svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 4C9.238 4 7 6.238 7 9a1 1 0 0 0 2 0c0-1.658 1.342-3 3-3s3 1.342 3 3c0 .816-.199 1.294-.438 1.629-.262.365-.625.638-1.128.985l-.116.078c-.447.306-1.023.699-1.469 1.247-.527.648-.849 1.467-.849 2.561v.5a1 1 0 1 0 2 0v-.5c0-.656.178-1.024.4-1.299.257-.314.603-.552 1.114-.903l.053-.037c.496-.34 1.133-.786 1.62-1.468C16.7 11.081 17 10.183 17 9c0-2.762-2.238-5-5-5ZM12 21.25a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5Z" fill="#ffffff"/></svg>
+							</div>
+							<select id="setting-channel">
+								<option value="latest" selected>latest</option>
+								<option value="beta">beta</option>
+								<option value="alpha">alpha</option>
+							</select>
+						</div>
+					</div>
+					<div class="box">
+						<h2 data-lang="features"></h2>
+						<p data-lang="not-available-yet"></p>
+						<!-- <div style="display: flex; gap: 10px; align-items: center;"> -->
+							<!-- <input type="checkbox" checked id="feature-student-leaderboard"> -->
+							<!-- add dialog box when trying to uncheck for confirm saying that it might degrade the student's experience -->
+							<!-- <h2 style="margin: 0; font-size: 1.4rem;">Rangliste bei Schülern</h2> -->
+						<!-- </div> -->
 					</div>
 				</div>
 			</div>
