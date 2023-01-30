@@ -36,6 +36,7 @@ ws.addEventListener("message", async (msg) => {
 		return;
 	}
 	const packet = JSON.parse(msg.data);
+	console.log(packet);
 	if(packet.type == "conversationError") {
 		alert("Server: " + packet.error);
 		location.reload();
