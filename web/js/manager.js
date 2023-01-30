@@ -106,6 +106,7 @@ ws.addEventListener("message", async (msg) => {
 			alert(packet.error);
 			return;
 		}
+		if(selectedCourse == null) return;
 		if(packet.course.uuid == selectedCourse.uuid) {
 			$("#traffic-green").classList.remove("trafficOff");
 			$("#traffic-red").classList.add("trafficOff");
@@ -115,6 +116,7 @@ ws.addEventListener("message", async (msg) => {
 			alert(packet.error);
 			return;
 		}
+		if(selectedCourse == null) return;
 		if(packet.course.uuid == selectedCourse.uuid) {
 			$("#traffic-red").classList.remove("trafficOff");
 			$("#traffic-green").classList.add("trafficOff");
@@ -130,6 +132,7 @@ ws.addEventListener("message", async (msg) => {
 			alert(packet.error);
 			return;
 		}
+		if(selectedCourse == null) return;
 		if(packet.course.uuid == selectedCourse.uuid) renderLeaderboard(packet.leaderboard);
 	} else if(packet.type == "kick") {
 		console.log(packet);
