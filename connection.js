@@ -26,6 +26,7 @@ export class Connection {
 				return;
 			}
 			const packet = JSON.parse(msg.data);
+			console.log("USER SENDS", JSON.stringify(packet));
 			if(packet.type == "hi") {
 				this.school = await School.findOne({ where: { code: packet.schoolCode }, include: [Teacher, Course, Room] });
 				if(!this.school) {
@@ -331,6 +332,8 @@ export class Connection {
 					if(!student) {
 						student = await course.createStudent({name: capitalizeWords(packet.name.split(" ")).join(" ")});
 					}
+					console.log("STUDENT LOGS IN WITH NAME: " + student.name);
+					console.log("STUDENT OBJECT IS: " + JSON.stringify(student.toJSON()));
 					this.name = student.name;
 					this.uuid = student.uuid;
 					this.ws.send(JSON.stringify({type: "login", success: true, student}));
@@ -379,6 +382,7 @@ export class Connection {
 						return;
 					}
 					const s = await course.getStudents();
+					console.log("Da name is", this.name);
 					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
 					if(!student) return;
 					if(packet.level != student.level) return;
