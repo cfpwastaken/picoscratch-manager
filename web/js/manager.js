@@ -14,6 +14,25 @@ let username;
 let navItems;
 const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings")];
 let selectedCourse;
+let topleaderboard;
+
+window.addEventListener("message", async (e) => {
+	console.log(e);
+	if(!hasJsonStructure(e.data)) return;
+	const data = JSON.parse(e.data);
+	if(data.type == "schoolcode") {
+		await loginSchoolcode(data.code);
+	} else if(data.type == "login") {
+		await loginSchool(uuid, data.username, data.password);
+	} else if(data.type == "leaderboard") {
+		renderLeaderboard(data.leaderboard);
+	} else if(data.type == "getLeaderboard") {
+		window.parent.postMessage(JSON.stringify({
+			type: "leaderboard",
+			leaderboard: topleaderboard
+		}));
+	}
+});
 
 setLang("en");
 // await loginSchoolcode("demopsm");
@@ -431,6 +450,7 @@ function createRoom(room) {
 
 function renderLeaderboard(leaderboard) {
 	console.log(leaderboard);
+	topleaderboard = leaderboard;
 	$("#leaderboard table").innerHTML = "";
 	const tr = document.createElement("tr");
 	const th = document.createElement("th");

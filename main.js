@@ -112,6 +112,12 @@ function randomCode() {
 // console.log(JSON.stringify(await school.getCourses()));
 // await school.save();
 
+app.get("/api/resetDemo", async (req, res) => {
+	await School.destroy({ where: { code: "demopsm" }, force: true });
+	await School.create({ name: "Demo School", adminPassword: "secret", code: "demopsm", lang: "de" })
+	res.send("OK");
+});
+
 app.get("/api/schoolcode/:code", async (req, res) => {
 	const s = await School.findOne({ where: { code: req.params.code } });
 	console.log(s);
