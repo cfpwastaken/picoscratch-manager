@@ -401,6 +401,7 @@ export class Connection {
 					}
 					this.room = _room;
 					this.ws.send(JSON.stringify({type: "room", success: true }));
+					return;
 				} else if(packet.type == "login") {
 					if(!packet.name) {
 						this.ws.send(JSON.stringify({type: "login", success: false, error: "Missing name"}));
@@ -430,6 +431,7 @@ export class Connection {
 					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
 					this.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
 					await resendLeaderboard(this.school, course);
+					return;
 				}
 				if(!this.name) {
 					this.ws.send(JSON.stringify({type: "conversationError", success: false, error: "You have not logged in yet"}));
