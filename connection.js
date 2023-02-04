@@ -430,7 +430,13 @@ export class Connection {
 					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student)}));
 					this.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
 					await resendLeaderboard(this.school, course);
-				} else if(packet.type == "info") {
+				}
+				if(!this.name) {
+					this.ws.send(JSON.stringify({type: "conversationError", success: false, error: "You have not logged in yet"}));
+					this.ws.close();
+					return;
+				}
+				if(packet.type == "info") {
 					if(!packet.level) {
 						this.ws.send(JSON.stringify({type: "info", success: false, error: "Missing level id"}));
 						return;
