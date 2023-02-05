@@ -24,12 +24,12 @@
 		"desc": "Blink, blink!",
 		"instructions": [
 			{
-				"text": "Nehme ein \"Wiederhole fortlaufend\" Block und ziehe ihn unter den \"Wenn grüne Flagge geklickt\" Block",
+				"text": "Nehme ein \"Wiederhole fortlaufend\" Block und ziehe ihn in den \"Wenn grüne Flagge geklickt\" Block",
 				"block": "control_forever",
 				"previousBlock": "event_whenflagclicked"
 			},
 			{
-				"text": "Nehme ein \"Schalte interne LED an\" Block und ziehe ihn unter den \"Wiederhole\" Block",
+				"text": "Nehme ein \"Schalte interne LED an\" Block und ziehe ihn in den \"Wiederhole\" Block",
 				"block": "components_internalledon",
 				"parentBlock": "control_forever"
 			},
@@ -84,7 +84,7 @@
 				"previousBlock": "event_whenflagclicked"
 			},
 			{
-				"text": "Nehme ein \"Schalte LED an\" Block und ziehe ihn unter den \"Wiederhole\" Block",
+				"text": "Nehme ein \"Schalte LED an\" Block und ziehe ihn in den \"Wiederhole\" Block",
 				"block": "components_ledon",
 				"parentBlock": "control_forever"
 			},

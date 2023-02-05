@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { loggedIn, tasks } from "./main.js";
+import { lastPing, loggedIn, tasks } from "./main.js";
 import { Course } from "./model/course.js";
 import { Room } from "./model/room.js";
 import { School } from "./model/school.js";
@@ -89,6 +89,15 @@ export class Connection {
 					const rooms = await this.school.getRooms();
 					this.ws.send(JSON.stringify({type: "hi", success: true, schoolname: this.school.name, rooms, lang: this.school.lang}));
 				}
+				return;
+			} else if(packet.type == "pong") {
+				// Calculate ping time using the lastPing variable
+				const ping = Date.now() - lastPing;
+				// If thats too long, send a warning packet
+				if(ping > 1000) {
+					this.ws.send(JSON.stringify({type: "pingWarn", warning: "Your ping is too high. You might experience lag"}));
+				}
+				ws.send(JSON.stringify({type: "pingTime", ping}));
 				return;
 			}
 			if(this.clientType == "") {

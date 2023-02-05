@@ -156,10 +156,12 @@ app.get("*", (req, res) => {
 
 export const loggedIn = [];
 
+export let lastPing;
 setInterval(() => {
 	for(const c of loggedIn) {
 		if(c.ws.readyState == 1) c.ws.send(JSON.stringify({type: "ping"}));
 	}
+	lastPing = Date.now();
 }, 10000);
 
 wss.addListener("connection", (ws) => {
