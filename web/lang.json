@@ -45,7 +45,9 @@
 		"deleteaction": "%s löschen",
 		"setlevelaction": "Übung für %s setzen",
 		"reload-to-apply-new-lang": "Neue Sprache wird erst nach neu laden dieses Tabs und neustarten des Programms angewendet.",
-		"course": "Kurs"
+		"course": "Kurs",
+		"show": "Anzeigen",
+		"hide": "Verstecken"
 	},
 	"en": {
 		"picoscratch-manager": "PicoScratch Manager",
@@ -93,6 +95,8 @@
 		"deleteaction": "Delete %s",
 		"setlevelaction": "Set excercise for %s",
 		"reload-to-apply-new-lang": "New language will only be applied after reloading this tab and restarting the program.",
-		"course": "Course"
+		"course": "Course",
+		"show": "Show",
+		"hide": "Hide"
 	}
 }
