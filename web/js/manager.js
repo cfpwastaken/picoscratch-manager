@@ -16,8 +16,8 @@ const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#co
 let selectedCourse;
 
 setLang("en");
-// await loginSchoolcode("demopsm");
-// await loginSchool(uuid, "admin", "secret");
+await loginSchoolcode("demopsm");
+await loginSchool(uuid, "admin", "secret");
 
 function hasJsonStructure(str) {
 	if(typeof str !== "string") return false;
@@ -432,6 +432,7 @@ function createRoom(room) {
 function renderLeaderboard(leaderboard) {
 	console.log(leaderboard);
 	$("#leaderboard table").innerHTML = "";
+	$("#absents").innerHTML = "";
 	const tr = document.createElement("tr");
 	const th = document.createElement("th");
 	th.innerText = translate("place");
@@ -517,6 +518,12 @@ function renderLeaderboard(leaderboard) {
 
 		tr.appendChild(actions);
 		$("#leaderboard table").appendChild(tr);
+
+		if(student.status == "offline") {
+			const absentStudent = document.createElement("absent-student");
+			absentStudent.innerText = student.name;
+			document.querySelector("#absents").append(absentStudent);
+		}
 	}
 }
 
