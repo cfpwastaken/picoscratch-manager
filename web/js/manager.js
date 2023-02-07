@@ -645,3 +645,15 @@ $("#submit-room").addEventListener("click", async () => {
 	}
 	ws.send(JSON.stringify({ type: "addRoom", name: $("#room-name").value }))
 });
+
+$("#show-absents-button").addEventListener("click", () => {
+	$("#absents").style.display = "";
+	$("#hide-absents-button").style.display = "";
+	$("#show-absents-button").style.display = "none";
+});
+
+$("#hide-absents-button").addEventListener("click", () => {
+	$("#absents").style.display = "none";
+	$("#hide-absents-button").style.display = "none";
+	$("#show-absents-button").style.display = "";
+});
