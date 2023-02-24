@@ -1,0 +1,22 @@
+#registerOptions > div {
+	background-color: rgba(29, 29, 29, 0.8);
+	backdrop-filter: blur(15px);
+	border-radius: 10px;
+	width: 50vh;
+	height: 50vh;
+	padding: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+#registerOptions {
+	display: flex;
+	gap: 15px;
+	flex-wrap: wrap;
+}
+
+h2 {
+	margin: 5px;
+}
