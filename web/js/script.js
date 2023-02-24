@@ -1,5 +1,5 @@
 document.querySelector("#learn-download").addEventListener("click", async () => {
-	const latest = await fetch("https://corsanywhere.herokuapp.com/https://cfp.is-a.dev/update/picoscratch-learn/latest.yml").then(r => r.text());
+	const latest = await fetch("https://cfp.is-a.dev/update/picoscratch-learn/latest.yml").then(r => r.text());
 	/*
 	The format is:
 	version: 1.3.1
