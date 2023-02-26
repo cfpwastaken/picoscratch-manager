@@ -512,7 +512,7 @@ function renderLeaderboard(leaderboard) {
 		setLevelAction.addEventListener("click", () => {
 			const level = prompt(translate("setlevelaction").replaceAll("%s", student.name), student.level);
 			if(level == null) return;
-			ws.send(JSON.stringify({ type: "setLevel", uuid: student.uuid, level, courseUUID: selectedCourse.uuid }));
+			ws.send(JSON.stringify({ type: "setLevel", uuid: student.uuid, level: parseInt(level), courseUUID: selectedCourse.uuid }));
 		});
 		setLevelAction.title = translate("setlevelaction").replaceAll("%s", student.name);
 		actions.appendChild(setLevelAction);

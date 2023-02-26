@@ -67,7 +67,7 @@ export class Connection {
             const rawpacket = JSON.parse(msg.data.toString());
             const zodVerify = InPacket.safeParse(rawpacket);
             if (!zodVerify.success) {
-                this.ws.send(JSON.stringify({ type: "conversationError", error: "You are speaking nonsense to me" }));
+                this.ws.send(JSON.stringify({ type: "conversationError", error: "I don't know of such a packet!", zoderror: zodVerify.error.issues }));
                 this.ws.close();
                 return;
             }
