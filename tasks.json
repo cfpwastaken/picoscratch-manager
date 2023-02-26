@@ -1,5 +1,8 @@
 [
 	{
+		"name": "Invalid",
+		"desc": "something went wrong",
+		"instructions": [],
 		"a": {
 			"name": "Das Steckbrett",
 			"type": "reading",
