@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 	next();
 })
 
-app.use(express.static("web"));
+app.use(express.static("src/web"));
 app.use(bodyParser.json());
 
 await loadModels();

@@ -51,7 +51,7 @@ app.use((req, res, next) => {
         return res.status(500).sendFile("web/error.html", { root: __dirname });
     next();
 });
-app.use(express.static("web"));
+app.use(express.static("src/web"));
 app.use(bodyParser.json());
 await loadModels();
 function randomCode() {
