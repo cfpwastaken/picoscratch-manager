@@ -1,13 +1,15 @@
 import { v4 as uuid } from "uuid";
 import { lastPing, loggedIn, tasks } from "./main.js";
-import { Course } from "./model/course.js";
-import { Room } from "./model/room.js";
-import { School } from "./model/school.js";
-import { Student } from "./model/student.js";
-import { Teacher } from "./model/teacher.js";
+import Course from "./model/course.js";
+import Room from "./model/room.js";
+import School from "./model/school.js";
+import Student from "./model/student.js";
+import Teacher from "./model/teacher.js";
 import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, courseLeaderboardJSON, studentLevelpath } from "./utils.js";
+import { WebSocket } from "ws";
+import { InPacket, InTeacherHiPacket } from "./types/Packet.js";
 
-function broadcastAdmins(school, packet, exceptCID) {
+function broadcastAdmins(school: School, packet: object, exceptCID?: string) {
 	for(const connection of loggedIn) {
 		if(exceptCID && connection.cid == exceptCID) continue;
 		if(connection.isAdmin && connection.school.uuid == school.uuid) {
@@ -16,7 +18,7 @@ function broadcastAdmins(school, packet, exceptCID) {
 	}
 }
 
-function broadcastTeachers(school, packet, exceptCID) {
+function broadcastTeachers(school: School, packet: object, exceptCID?: string) {
 	for(const connection of loggedIn) {
 		if(connection.clientType != "teacher") continue;
 		if(exceptCID && connection.cid == exceptCID) continue;
@@ -25,46 +27,58 @@ function broadcastTeachers(school, packet, exceptCID) {
 	}
 }
 
-function broadcastStudentsInCourse(course, packet) {
+async function broadcastStudentsInCourse(course: Course, packet: object) {
 	for(const connection of loggedIn) {
 		if(connection.clientType != "student") continue;
 		if(!connection.room) continue;
-		const c = connection.room.getCourse();
+		const c = await connection.room.$get("course");
 		if(!c) continue;
-		if(!c.uuid == course.uuid) continue;
+		if(c.uuid != course.uuid) continue;
 		connection.ws.send(JSON.stringify(packet));
 	}
 }
 
-async function resendLeaderboard(school, course) {
+async function resendLeaderboard(school: School, course: Course) {
 	const leaderboard = await courseLeaderboardJSON(course);
-	broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard});
+	await broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard});
 	broadcastTeachers(school, {type: "leaderboard", course, leaderboard});
 }
 
 export class Connection {
 	clientType = "";
 	isAdmin = false;
-	school;
-	room;
-	name;
+	school!: School;
+	room!: Room;
+	name!: string;
 	cid = uuid();
-	ws
-	uuid
-	idle
+	ws: WebSocket
+	uuid!: string;
+	idle!: boolean;
 
-	constructor(ws) {
+	constructor(ws: WebSocket) {
 		this.ws = ws;
 		this.ws.addEventListener("message", async (msg) => {
-			if(!hasJsonStructure(msg.data)) {
+			if(!hasJsonStructure(msg.data.toString())) {
 				this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}))
 				this.ws.close();
 				return;
 			}
-			const packet = JSON.parse(msg.data);
+			const rawpacket = JSON.parse(msg.data.toString());
+			const zodVerify = InPacket.safeParse(rawpacket);
+			if(!zodVerify.success) {
+				this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}))
+				this.ws.close();
+				return;
+			}
+			const packet = zodVerify.data;
 			console.log("USER SENDS", JSON.stringify(packet));
 			if(packet.type == "hi") {
-				this.school = await School.findOne({ where: { code: packet.schoolCode }, include: [Teacher, Course, Room] });
+				const s = await School.findOne({ where: { code: packet.schoolCode }, include: [Teacher, Course, Room] });
+				if(s == null) {
+					this.ws.send(JSON.stringify({type: "hi", success: false}));
+					return;
+				}
+				this.school = s;
 				if(!this.school) {
 					this.ws.send(JSON.stringify({type: "hi", success: false}));
 					return;
@@ -77,8 +91,14 @@ export class Connection {
 					return;
 				}
 				if(this.clientType == "teacher") {
+					if(!InTeacherHiPacket.safeParse(packet).success) {
+						this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}))
+						this.ws.close();
+						return;
+					}
+					const pack = packet as InTeacherHiPacket;
 					// Authenticate teacher using authenticate function
-					const auth = await authenticate(this.school.uuid, packet.username, packet.password);
+					const auth = await authenticate(this.school.uuid, pack.username, pack.password);
 					if(auth.error) {
 						this.ws.send(JSON.stringify({type: "hi", success: false}));
 						return;
@@ -86,7 +106,7 @@ export class Connection {
 					this.isAdmin = auth.admin;
 					this.ws.send(JSON.stringify({type: "hi", success: true, school: this.school, lang: this.school.lang}));
 				} else if(this.clientType == "student") {
-					const rooms = await this.school.getRooms();
+					const rooms = await this.school.$get("rooms");
 					this.ws.send(JSON.stringify({type: "hi", success: true, schoolname: this.school.name, rooms, lang: this.school.lang}));
 				}
 				return;
@@ -111,7 +131,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "addTeacher", success: false, error: "Missing name or password"}));
 						return;
 					}
-					const t = await this.school.createTeacher({name: packet.username, password: packet.password});
+					const t = await this.school.$create("teacher", {name: packet.username, password: packet.password});
 					this.ws.send(JSON.stringify({type: "addTeacher", success: true, teacher: t}));
 					broadcastAdmins(this.school, {type: "addTeacher", teacher: t}, this.cid);
 				} else if(packet.type == "deleteTeacher") {
@@ -119,7 +139,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "deleteTeacher", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const t = await this.school.getTeachers();
+					const t = await this.school.$get("teachers");
 					const teacher = t.find(t => t.uuid == packet.uuid);
 					if(!teacher) {
 						this.ws.send(JSON.stringify({type: "deleteTeacher", success: false, error: "Teacher not found"}));
@@ -133,7 +153,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "addCourse", success: false, error: "Missing name"}));
 						return;
 					}
-					const c = await this.school.createCourse({name: packet.name});
+					const c = await this.school.$create("course", {name: packet.name});
 					this.ws.send(JSON.stringify({type: "addCourse", success: true, course: c}));
 					broadcastAdmins(this.school, {type: "addCourse", course: c}, this.cid);
 				} else if(packet.type == "deleteCourse") {
@@ -141,7 +161,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "deleteCourse", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.uuid);
 					if(!course) {
 						this.ws.send(JSON.stringify({type: "deleteCourse", success: false, error: "Course not found"}));
@@ -155,7 +175,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "addRoom", success: false, error: "Missing name"}));
 						return;
 					}
-					const r = await this.school.createRoom({name: packet.name});
+					const r = await this.school.$create("room", {name: packet.name});
 					this.ws.send(JSON.stringify({type: "addRoom", success: true, room: r}));
 					broadcastAdmins(this.school, {type: "addRoom", room: r}, this.cid);
 				} else if(packet.type == "deleteRoom") {
@@ -163,7 +183,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "deleteRoom", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const r = await this.school.getRooms();
+					const r = await this.school.$get("rooms");
 					const room = r.find(r => r.uuid == packet.uuid);
 					if(!room) {
 						this.ws.send(JSON.stringify({type: "deleteRoom", success: false, error: "Room not found"}));
@@ -195,7 +215,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Missing uuid or password"}));
 						return;
 					}
-					const t = await this.school.getTeachers();
+					const t = await this.school.$get("teachers");
 					const teacher = t.find(t => t.uuid == packet.uuid);
 					if(!teacher) {
 						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Teacher not found"}));
@@ -209,7 +229,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Missing uuid or name"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.uuid);
 					if(!course) {
 						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Course not found"}));
@@ -226,19 +246,19 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Missing uuid or course"}));
 						return;
 					}
-					const r = await this.school.getRooms();
+					const r = await this.school.$get("rooms");
 					const room = r.find(r => r.uuid == packet.uuid) || null;
 					if(!room) {
 						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Room not found"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.course) || null;
 					if(!course && packet.course != "nocourse") {
 						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Course not found"}));
 						return;
 					}
-					await room.setCourse(course);
+					await room.$set("course", course);
 					this.ws.send(JSON.stringify({type: "setActiveCourse", success: true, course: course}));
 					broadcastTeachers(this.school, {type: "setActiveCourse", uuid: packet.uuid, course: course}, this.cid);
 				} else if(packet.type == "startCourse") {
@@ -246,7 +266,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "startCourse", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.uuid) || null;
 					if(!course) {
 						this.ws.send(JSON.stringify({type: "startCourse", success: false, error: "Course not found"}));
@@ -267,7 +287,7 @@ export class Connection {
 					// 		logged.ws.send(JSON.stringify({type: "startCourse", course}));
 					// 	}
 					// }
-					broadcastStudentsInCourse(course, {type: "startCourse"});
+					await broadcastStudentsInCourse(course, {type: "startCourse"});
 					broadcastTeachers(this.school, {type: "startCourse", course}, this.cid);
 					this.ws.send(JSON.stringify({type: "startCourse", success: true, course}));
 				} else if(packet.type == "stopCourse") {
@@ -275,7 +295,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "stopCourse", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.uuid) || null;
 					if(!course) {
 						this.ws.send(JSON.stringify({type: "stopCourse", success: false, error: "Course not found"}));
@@ -296,7 +316,7 @@ export class Connection {
 					// 		logged.ws.send(JSON.stringify({type: "stopCourse", course}));
 					// 	}
 					// }
-					broadcastStudentsInCourse(course, {type: "stopCourse"});
+					await broadcastStudentsInCourse(course, {type: "stopCourse"});
 					broadcastTeachers(this.school, {type: "stopCourse", course}, this.cid);
 					this.ws.send(JSON.stringify({type: "stopCourse", success: true, course}));
 				} else if(packet.type == "getCourseInfo") {
@@ -304,7 +324,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "getCourseInfo", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const c = await this.school.getCourses();
+					const c = await this.school.$get("courses");
 					const course = c.find(c => c.uuid == packet.uuid) || null;
 					if(!course) {
 						this.ws.send(JSON.stringify({type: "getCourseInfo", success: false, error: "Course not found"}));
@@ -402,7 +422,7 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "room", success: false, error: "Missing uuid"}));
 						return;
 					}
-					const r = await this.school.getRooms();
+					const r = await this.school.$get("rooms");
 					const _room = r.find(r => r.uuid == packet.uuid) || null;
 					if(!_room) {
 						this.ws.send(JSON.stringify({type: "room", success: false, error: "Room not found"}));
@@ -421,16 +441,17 @@ export class Connection {
 						return;
 					}
 					this.room.reload();
-					const course = await this.room.getCourse();
+					const course = await this.room.$get("course");
 					if(course == null) {
 						this.ws.send(JSON.stringify({type: "login", success: false, error: "Teacher has not set a course yet"}));
 						return;
 					}
-					const s = await course.getStudents();
-					let student = s.find(s => s.name == capitalizeWords(packet.name.split(" ")).join(" ")) || null;
-					if(!student) {
-						student = await course.createStudent({name: capitalizeWords(packet.name.split(" ")).join(" ")});
+					const s = await course.$get("students");
+					let stud = s.find(s => s.name == capitalizeWords(packet.name.split(" ")).join(" ")) || null;
+					if(!stud) {
+						stud = await course.$create("student", {name: capitalizeWords(packet.name.split(" ")).join(" ")}) as Student;
 					}
+					let student = stud as Student;
 					console.log("STUDENT LOGS IN WITH NAME: " + student.name);
 					console.log("STUDENT OBJECT IS: " + JSON.stringify(student.toJSON()));
 					this.name = student.name;
@@ -458,13 +479,13 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "task", success: false, error: "Missing level id"}));
 						return;
 					}
-					const course = await this.room.getCourse();
+					const course = await this.room.$get("course");
 					if(course == null) return;
 					if(!course.isRunning) {
 						this.ws.send(JSON.stringify({type: "task", success: false, error: "Course is not running"}));
 						return;
 					}
-					const s = await course.getStudents();
+					const s = await course.$get("students");
 					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
 					if(!student) return;
 					if(!(packet.level <= student.level)) {
@@ -483,13 +504,13 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "done", success: false, error: "Missing level id"}));
 						return;
 					}
-					const course = await this.room.getCourse();
+					const course = await this.room.$get("course");
 					if(course == null) return;
 					if(!course.isRunning) {
 						this.ws.send(JSON.stringify({type: "done", success: false, error: "Course is not running"}));
 						return;
 					}
-					const s = await course.getStudents();
+					const s = await course.$get("students");
 					console.log("Da name is", this.name);
 					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
 					if(!student) return;
@@ -539,7 +560,7 @@ export class Connection {
 					}
 					this.idle = packet.idle;
 					console.log(this.idle);
-					const course = await this.room.getCourse();
+					const course = await this.room.$get("course");
 					console.log(course);
 					if(course == null) return;
 					console.log("A");
@@ -551,7 +572,7 @@ export class Connection {
 			loggedIn.splice(loggedIn.indexOf(this), 1);
 			if(this.clientType == "student") {
 				if(!this.room) return;
-				const course = await this.room.getCourse();
+				const course = await this.room.$get("course");
 				if(course == null) return;
 				await resendLeaderboard(this.school, course);
 			}

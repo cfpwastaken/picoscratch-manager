@@ -1,11 +1,12 @@
 import { compare } from "bcrypt";
 import { loggedIn, tasks } from "./main.js";
-import { Course } from "./model/course.js";
-import { Room } from "./model/room.js";
-import { School } from "./model/school.js";
-import { Teacher } from "./model/teacher.js";
+import Course from "./model/course.js";
+import Room from "./model/room.js";
+import School from "./model/school.js";
+import Student from "./model/student.js";
+import Teacher from "./model/teacher.js";
 
-export function hasJsonStructure(str) {
+export function hasJsonStructure(str: string) {
 	if(typeof str !== "string") return false;
 	try {
 		const result = JSON.parse(str);
@@ -19,22 +20,22 @@ export function hasJsonStructure(str) {
 
 export const validClientTypes = ["teacher", "student"];
 
-export function studentLevelpath(student) {
+export function studentLevelpath(student: Student) {
 	return {done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length};
 }
 
-export function isWhatPercentOf(numA, numB) {
+export function isWhatPercentOf(numA: number, numB: number) {
   return (numA / numB) * 100;
 }
 
-export function capitalizeWords(arr) {
+export function capitalizeWords(arr: string[]) {
   return arr.map(element => {
     return element.charAt(0).toUpperCase() + element.slice(1).toLowerCase();
   });
 }
 
-export async function courseLeaderboardJSON(course) {
-	const students = await course.getStudents();
+export async function courseLeaderboardJSON(course: Course) {
+	const students = await course.$get("students");
 	const leaderboard = students.map(s => {
 		const percent = isWhatPercentOf(s.correctqs, s.answeredqs);
 		return {
@@ -47,25 +48,27 @@ export async function courseLeaderboardJSON(course) {
 			achievements: s.achievements,
 			achievementdata: s.achievementdata,
 			uuid: s.uuid,
-			status: loggedIn.find(l => l.uuid == s.uuid) ? (loggedIn.find(l => l.uuid == s.uuid).idle ? "idle" : "online") : "offline"
+			status: loggedIn.find(l => l.uuid == s.uuid) ? (loggedIn.find(l => {
+				return l.uuid ? l.uuid == s.uuid : false;
+			})?.idle ? "idle" : "online") : "offline"
 		}
 	});
 	leaderboard.sort((a, b) => b.xp - a.xp);
 	return leaderboard;
 }
 
-export async function authenticate(uuid, username, password) {
+export async function authenticate(uuid: string, username: string, password: string) {
 	const s = await School.findOne({ where: { uuid: uuid }, include: [Teacher, Course, Room] });
-	if(!s) return {error: "School not found"};
+	if(!s) return {error: "School not found", admin: false};
 	if(username.toLowerCase() == "admin") {
 		if(await compare(password, s.adminPassword)) {
 			return {success: true, admin: true};
 		}
-		return {error: "Wrong password"};
+		return {error: "Wrong password", admin: false};
 	}
-	const ts = await s.getTeachers();
+	const ts = await s.$get("teachers");
 	const t = ts.find(t => t.name.toLowerCase() == username.toLowerCase());
-	if(!t) return {error: "Invalid username"};
-	if(!(await compare(password, t.password))) return {error: "Wrong password"};
+	if(!t) return {error: "Invalid username", admin: false};
+	if(!(await compare(password, t.password))) return {error: "Wrong password", admin: false};
 	return {success: true, admin: false};
 }
