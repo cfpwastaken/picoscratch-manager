@@ -22,13 +22,13 @@ export default class Room extends Model {
 	declare uuid: string;
 
   @ForeignKey(() => School)
-  declare schoolId: string;
+  declare schoolUuid: string;
 	
 	@BelongsTo(() => School)
 	declare school: School;
 
   @ForeignKey(() => Course)
-  declare courseId: string;
+  declare courseUuid: string;
 
 	@BelongsTo(() => Course)
 	declare course: Course;

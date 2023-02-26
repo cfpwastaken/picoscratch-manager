@@ -71,7 +71,7 @@ export default class Student extends Model {
 	declare achievementdata: {lastday: number, completedLevels: number};
 
   @ForeignKey(() => Course)
-	declare courseId: string;
+	declare courseUuid: string;
 
 	@BelongsTo(() => Course)
 	declare course: Course;

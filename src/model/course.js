@@ -32,7 +32,7 @@ __decorate([
 ], Course.prototype, "isRunning", void 0);
 __decorate([
     ForeignKey(() => School)
-], Course.prototype, "schoolId", void 0);
+], Course.prototype, "schoolUuid", void 0);
 __decorate([
     BelongsTo(() => School)
 ], Course.prototype, "school", void 0);

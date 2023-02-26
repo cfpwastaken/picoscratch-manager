@@ -74,7 +74,7 @@ __decorate([
 ], Student.prototype, "achievementdata", void 0);
 __decorate([
     ForeignKey(() => Course)
-], Student.prototype, "courseId", void 0);
+], Student.prototype, "courseUuid", void 0);
 __decorate([
     BelongsTo(() => Course)
 ], Student.prototype, "course", void 0);

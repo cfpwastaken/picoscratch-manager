@@ -33,7 +33,7 @@ __decorate([
 ], Teacher.prototype, "password", void 0);
 __decorate([
     ForeignKey(() => School)
-], Teacher.prototype, "schoolId", void 0);
+], Teacher.prototype, "schoolUuid", void 0);
 __decorate([
     BelongsTo(() => School)
 ], Teacher.prototype, "school", void 0);

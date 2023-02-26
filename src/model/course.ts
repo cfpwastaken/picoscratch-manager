@@ -30,7 +30,7 @@ export default class Course extends Model {
 	declare isRunning: boolean;
 
   @ForeignKey(() => School)
-  declare schoolId: string;
+  declare schoolUuid: string;
 
 	@BelongsTo(() => School)
 	declare school: School;

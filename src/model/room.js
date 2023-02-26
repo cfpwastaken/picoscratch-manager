@@ -24,13 +24,13 @@ __decorate([
 ], Room.prototype, "uuid", void 0);
 __decorate([
     ForeignKey(() => School)
-], Room.prototype, "schoolId", void 0);
+], Room.prototype, "schoolUuid", void 0);
 __decorate([
     BelongsTo(() => School)
 ], Room.prototype, "school", void 0);
 __decorate([
     ForeignKey(() => Course)
-], Room.prototype, "courseId", void 0);
+], Room.prototype, "courseUuid", void 0);
 __decorate([
     BelongsTo(() => Course)
 ], Room.prototype, "course", void 0);

@@ -31,7 +31,7 @@ export default class Teacher extends Model {
 	declare password: string;
 
   @ForeignKey(() => School)
-  declare schoolId: string;
+  declare schoolUuid: string;
 
 	@BelongsTo(() => School)
 	declare school: School;
