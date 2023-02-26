@@ -159,6 +159,7 @@ async function loginSchoolcode(code) {
 	if(school.error) {
 		$("#login-spinner").style.display = "none";
 		$("#code").disabled = false;
+		$("#login").disabled = false;
 		$("#code").value = "";
 		$("#code").focus();
 		return;
@@ -542,10 +543,18 @@ $("#schoolcode-container").addEventListener("keyup", async (e) => {
 		else {
 			e.target.blur();
 			$("#code").disabled = true;
+			$("#login").disabled = true;
 			$("#login-spinner").style.display = "";
 			await loginSchoolcode($("#code").value);
 		}
 	}
+})
+
+$("#login-btn").addEventListener("click", async (e) => {
+	$("#code").disabled = true;
+	$("#login").disabled = true;
+	$("#login-spinner").style.display = "";
+	await loginSchoolcode($("#code").value);
 })
 
 $("#login-user-btn").addEventListener("click", async () => {

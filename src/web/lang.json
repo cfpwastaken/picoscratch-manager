@@ -47,7 +47,8 @@
 		"reload-to-apply-new-lang": "Neue Sprache wird erst nach neu laden dieses Tabs und neustarten des Programms angewendet.",
 		"course": "Kurs",
 		"show": "Anzeigen",
-		"hide": "Verstecken"
+		"hide": "Verstecken",
+		"login-btn": "Anmelden"
 	},
 	"en": {
 		"picoscratch-manager": "PicoScratch Manager",
@@ -97,6 +98,7 @@
 		"reload-to-apply-new-lang": "New language will only be applied after reloading this tab and restarting the program.",
 		"course": "Course",
 		"show": "Show",
-		"hide": "Hide"
+		"hide": "Hide",
+		"login-btn": "Login"
 	}
 }
