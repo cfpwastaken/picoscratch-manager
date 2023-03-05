@@ -71,6 +71,18 @@ app.post("/api/support", async (req, res) => {
     const support = await Support.create({ data: JSON.stringify(req.body.data), code: randomCode() });
     res.send({ id: support.id });
 });
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+app.post("/api/makeDemoSchool", async (req, res) => {
+    if (!req.body.schoolname || !req.body.password || !req.body.lang)
+        return res.status(400).send({ error: "Missing data" });
+    const randomcode = randomCode();
+    const code = "demo" + randomcode.substring(4);
+    await sleep(5000);
+    await School.create({ name: req.body.schoolname, adminPassword: req.body.password, lang: req.body.lang, code });
+    res.send({ code });
+});
 app.get("*", (req, res) => {
     res.sendFile("web/404.html", { root: __dirname });
 });

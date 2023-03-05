@@ -2,13 +2,89 @@
 	background-color: rgba(29, 29, 29, 0.8);
 	backdrop-filter: blur(15px);
 	border-radius: 10px;
-	width: 50vh;
-	height: 50vh;
+	width: 40vh;
+	height: 40vh;
 	padding: 5px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+	animation: slideInFromRight 1s ease-in-out;
+}
+
+.slideInFromRight {
+	animation: slideInFromRight 1s ease-in-out;
+}
+
+@keyframes slideInFromRight {
+	0% {
+		transform: translateX(100px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.slideOutToTop {
+	animation: slideOutToTop 1s ease-in-out;
+}
+
+@keyframes slideOutToTop {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-100px);
+		opacity: 0;
+	}
+}
+
+.slideInFromBottom {
+	animation: slideInFromBottom 1s ease-in-out;
+}
+
+@keyframes slideInFromBottom {
+	0% {
+		transform: translateY(100px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.slideOutToRight {
+	animation: slideOutToRight 1s ease-in-out;
+}
+
+@keyframes slideOutToRight {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(100px);
+		opacity: 0;
+	}
+}
+
+.slideInFromLeft {
+	animation: slideInFromLeft 1s ease-in-out;
+}
+
+@keyframes slideInFromLeft {
+	0% {
+		transform: translateX(-100px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 #registerOptions {
@@ -19,4 +95,11 @@
 
 h2 {
 	margin: 5px;
+}
+
+.badge {
+	background-color: white;
+	border-radius: 10px;
+	color: black;
+	padding: 5px;
 }

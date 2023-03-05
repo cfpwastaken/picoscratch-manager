@@ -50,6 +50,13 @@ export default class School extends Model {
 	})
 	declare channel: string;
 
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.BOOLEAN,
+		defaultValue: false
+	})
+	declare isDemo: boolean;
+
 	@HasMany(() => Teacher)
 	declare teachers: Teacher[];
 

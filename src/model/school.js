@@ -52,6 +52,13 @@ __decorate([
     })
 ], School.prototype, "channel", void 0);
 __decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    })
+], School.prototype, "isDemo", void 0);
+__decorate([
     HasMany(() => Teacher)
 ], School.prototype, "teachers", void 0);
 __decorate([
