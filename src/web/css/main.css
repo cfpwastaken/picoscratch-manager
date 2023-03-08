@@ -400,3 +400,10 @@ th, td {
 .status-idle {
 	background-color: #F5F550;
 }
+
+.badge {
+	background-color: white;
+	border-radius: 10px;
+	color: black;
+	padding: 5px;
+}

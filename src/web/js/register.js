@@ -5,15 +5,6 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-$("#demo").addEventListener("click", async () => {
-	$("#firstscreen").classList.add("slideOutToRight");
-	await sleep(1000);
-	$("#firstscreen").classList.remove("slideOutToRight");
-	$("#firstscreen").style.display = "none";
-	$("#schoolname-screen").style.display = "flex";
-	$("#schoolname").focus();
-});
-
 $("#submit-schoolname").addEventListener("click", async () => {
 	$("#schoolname-screen").classList.remove("slideInFromLeft")
 	$("#schoolname-screen").classList.add("slideOutToRight");
@@ -31,7 +22,7 @@ $("#submit-password").addEventListener("click", async () => {
 	$("#password-screen").style.display = "none";
 	$("#creating-school").style.display = "flex";
 
-	const code = await fetch("/api/makeDemoSchool", {
+	const code = await fetch("/api/makeSchool", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"

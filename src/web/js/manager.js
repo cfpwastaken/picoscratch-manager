@@ -14,6 +14,7 @@ let username;
 let navItems;
 const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings")];
 let selectedCourse;
+let courses = [];
 
 setLang("en");
 // await loginSchoolcode("demopsm");
@@ -189,7 +190,13 @@ async function loadSchool() {
 	$("#login-user").style.display = "none";
 	$("#dashboard").style.display = "";
 
-	$("#schoolname").innerText = school.name;
+	$("#schoolname").innerText = school.name + " ";
+	if(school.isDemo) {
+		const demoBadge = document.createElement("span");
+		demoBadge.innerText = "DEMO";
+		demoBadge.classList.add("badge");
+		$("#schoolname").appendChild(demoBadge);
+	}
 	username = username.toLowerCase() == "admin" ? "Admin" : school.teachers.find(t => t.name.toLowerCase() === username.toLowerCase()).name;
 	$("#dashboard-username").innerText = username;
 	role = username.toLowerCase() == "admin" ? "admin" : "teacher";
@@ -295,9 +302,13 @@ async function loadSchool() {
 }
 
 function createCourse(course) {
+	// Array item
+	courses.push(course);
+	allRoomsRenderCourses();
+	
 	// Nav item
 	createCourseNavItem(course);
-
+	
 	// Courses item
 	createCourseItem(course);
 }
@@ -352,6 +363,10 @@ function createCourseItem(course) {
 		const newName = prompt(translate("new-name"), h2.innerText);
 		if(newName) {
 			ws.send(JSON.stringify({type: "renameCourse", uuid: course.uuid, name: newName}));
+			course.name = newName;
+			courses.splice(courses.indexOf(course), 1);
+			courses.push(course);
+			allRoomsRenderCourses();
 		}
 	});
 	actions.appendChild(renameButton);
@@ -359,6 +374,8 @@ function createCourseItem(course) {
 	deleteButton.innerHTML = '<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.5 6a1 1 0 0 1-.883.993L20.5 7h-.845l-1.231 12.52A2.75 2.75 0 0 1 15.687 22H8.313a2.75 2.75 0 0 1-2.737-2.48L4.345 7H3.5a1 1 0 0 1 0-2h5a3.5 3.5 0 1 1 7 0h5a1 1 0 0 1 1 1Zm-7.25 3.25a.75.75 0 0 0-.743.648L13.5 10v7l.007.102a.75.75 0 0 0 1.486 0L15 17v-7l-.007-.102a.75.75 0 0 0-.743-.648Zm-4.5 0a.75.75 0 0 0-.743.648L9 10v7l.007.102a.75.75 0 0 0 1.486 0L10.5 17v-7l-.007-.102a.75.75 0 0 0-.743-.648ZM12 3.5A1.5 1.5 0 0 0 10.5 5h3A1.5 1.5 0 0 0 12 3.5Z" fill="#C34040"/></svg>';
 	deleteButton.addEventListener("click", () => {
 		ws.send(JSON.stringify({ type: "deleteCourse", uuid: course.uuid }));
+		courses.splice(courses.indexOf(course), 1);
+		allRoomsRenderCourses();
 	});
 	actions.appendChild(deleteButton);
 	$("#courses").insertBefore(div, $("#addcourse"));
@@ -392,6 +409,28 @@ function createTeacher(teacher) {
 	$("#teachers").insertBefore(div, $("#addteacher"));
 }
 
+function roomRenderCourses(select) {
+	select.innerHTML = "";
+	const option = document.createElement("option");
+	option.innerText = translate("no-course");
+	option.value = "nocourse";
+	select.appendChild(option);
+	for(const course of courses) {
+		const option = document.createElement("option");
+		option.innerText = course.name;
+		option.value = course.uuid;
+		select.appendChild(option);
+	}
+}
+
+function allRoomsRenderCourses() {
+	for(const el of $$("[data-room] select")) {
+		console.log("[RENDER] ", el);
+		roomRenderCourses(el);
+	}
+}
+window.allRoomsRenderCourses = allRoomsRenderCourses;
+
 function createRoom(room) {
 	console.log("Room", room);
 	const div = document.createElement("div");
@@ -401,19 +440,10 @@ function createRoom(room) {
 	h2.innerText = room.name;
 	div.appendChild(h2);
 	const select = document.createElement("select");
-	const option = document.createElement("option");
-	option.innerText = translate("no-course");
-	option.value = "nocourse";
-	select.appendChild(option);
 	select.addEventListener("change", (e) => {
 		ws.send(JSON.stringify({ type: "setActiveCourse", uuid: room.uuid, course: select.value }));
 	});
-	for(const course of school.courses) {
-		const option = document.createElement("option");
-		option.innerText = course.name;
-		option.value = course.uuid;
-		select.appendChild(option);
-	}
+	roomRenderCourses(select);
 	select.value = room.courseUuid || "nocourse";
 	div.appendChild(select);
 	if(role == "admin") {
