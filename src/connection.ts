@@ -5,7 +5,7 @@ import Room from "./model/room.js";
 import School from "./model/school.js";
 import Student from "./model/student.js";
 import Teacher from "./model/teacher.js";
-import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, courseLeaderboardJSON, studentLevelpath } from "./utils.js";
+import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "./utils.js";
 import { WebSocket } from "ws";
 import { InPacket, InTeacherHiPacket } from "./types/Packet.js";
 
@@ -400,26 +400,26 @@ export class Connection {
 					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
 					await resendLeaderboard(this.school, course);
 				} else if(packet.type == "setLevel") {
-					if(!packet.uuid || !packet.courseUUID) {
-						this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Missing uuid or courseUUID"}));
-						return;
-					}
-					const course = await Course.findOne({where: {uuid: packet.courseUUID}});
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Course not found"}));
-						return;
-					}
-					const student = await Student.findOne({where: {uuid: packet.uuid}});
-					if(!student) {
-						this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Student not found"}));
-						return;
-					}
-					student.level = packet.level;
-					await student.save();
-					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
-					if(logged) {
-						logged.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
-					}
+					// if(!packet.uuid || !packet.courseUUID) {
+					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Missing uuid or courseUUID"}));
+					// 	return;
+					// }
+					// const course = await Course.findOne({where: {uuid: packet.courseUUID}});
+					// if(!course) {
+					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Course not found"}));
+					// 	return;
+					// }
+					// const student = await Student.findOne({where: {uuid: packet.uuid}});
+					// if(!student) {
+					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Student not found"}));
+					// 	return;
+					// }
+					// student.level = packet.level;
+					// await student.save();
+					// const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
+					// if(logged) {
+					// 	logged.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
+					// }
 					// for(const logged of loggedIn) {
 					// 	if(logged.clientType == "student") {
 					// 		if(!logged.room) continue;
@@ -431,7 +431,7 @@ export class Connection {
 					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
 					// 	}
 					// }
-					await resendLeaderboard(this.school, course);
+					// await resendLeaderboard(this.school, course);
 				}
 			}
 			if(this.clientType == "student") {
@@ -476,8 +476,9 @@ export class Connection {
 					this.uuid = student.uuid;
 					this.idle = false;
 					this.ws.send(JSON.stringify({type: "login", success: true, student}));
-					const levelpath = studentLevelpath(student, this.school.isDemo ? demoTasks : tasks);
-					this.ws.send(JSON.stringify({type: "levelpath", ...levelpath}));
+					// const levelpath = studentLevelpath(student, this.school.isDemo ? demoTasks : tasks);
+					// this.ws.send(JSON.stringify({type: "levelpath", ...levelpath}));
+					this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
 					this.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
 					await resendLeaderboard(this.school, course);
 					return;
@@ -488,16 +489,8 @@ export class Connection {
 					return;
 				}
 				if(packet.type == "info") {
-					if(!packet.level) {
-						this.ws.send(JSON.stringify({type: "info", success: false, error: "Missing level id"}));
-						return;
-					}
 					this.ws.send(JSON.stringify({ type: "info", name: tasks[packet.level].name, desc: tasks[packet.level].desc }));
 				} else if(packet.type == "task") {
-					if(!packet.level) {
-						this.ws.send(JSON.stringify({type: "task", success: false, error: "Missing level id"}));
-						return;
-					}
 					const course = await this.room.$get("course");
 					if(course == null) return;
 					if(!course.isRunning) {
@@ -507,22 +500,23 @@ export class Connection {
 					const s = await course.$get("students");
 					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
 					if(!student) return;
+					if(!(packet.section <= student.section)) {
+						this.ws.send(JSON.stringify({type: "task", success: false, error: "You have not completed the previous section yet"}));
+						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
+						return;
+					}
 					if(!(packet.level <= student.level)) {
 						this.ws.send(JSON.stringify({type: "task", success: false, error: "You have not completed the previous level yet"}));
-						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
+						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 						return;
 					}
-					if(!tasks[packet.level]) {
+					if(!tasks[packet.section].tasks[packet.level]) {
 						this.ws.send(JSON.stringify({type: "task", success: false, error: "Level not found"}));
-						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
+						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 						return;
 					}
-					this.ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.level] }));
+					this.ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.section].tasks[packet.level] }));
 				} else if(packet.type == "done") {
-					if(!packet.level) {
-						this.ws.send(JSON.stringify({type: "done", success: false, error: "Missing level id"}));
-						return;
-					}
 					const course = await this.room.$get("course");
 					if(course == null) return;
 					if(!course.isRunning) {
@@ -533,13 +527,19 @@ export class Connection {
 					console.log("Da name is", this.name);
 					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
 					if(!student) return;
+					if(!(packet.section <= student.section)) {
+						this.ws.send(JSON.stringify({type: "done", success: false, error: "You have not completed the previous section yet"}));
+						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
+						return;
+					}
 					if(packet.level != student.level) return;
 					if(!tasks[packet.level]) {
 						this.ws.send(JSON.stringify({type: "done", success: false, error: "Level not found"}));
-						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
+						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 						return;
 					}
 					student.level++;
+					student.totalLevels++;
 					if(packet.answeredqs) student.answeredqs += packet.answeredqs;
 					if(packet.correctqs) student.correctqs += packet.correctqs;
 					student.achievementdata.completedLevels++;
@@ -547,6 +547,17 @@ export class Connection {
 						if(!student.achievements.includes("fast")) {
 							student.achievements.push("fast");
 						}
+					}
+					// If the student has completed all the levels in the section, move them to the next section
+					console.log("Student level", student.level);
+					console.log("Tasks length", tasks[packet.section].tasks.length);
+					if(student.level >= tasks[packet.section].tasks.length) {
+						console.log("Moving to next section");
+						student.section++;
+						student.level = 0;
+						await student.save();
+						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
+						this.ws.send(JSON.stringify({ type: "sectionDone" }));
 					}
 					await student.save();
 					const leaderboard = await courseLeaderboardJSON(course);
@@ -571,7 +582,7 @@ export class Connection {
 					// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
 					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
 					await resendLeaderboard(this.school, course);
-					ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
+					ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 				} else if(packet.type == "idleStateChange") {
 					if(packet.idle === undefined) {
 						this.ws.send(JSON.stringify({type: "idleStateChange", success: false, error: "Missing idle state"}));
@@ -584,6 +595,23 @@ export class Connection {
 					if(course == null) return;
 					console.log("A");
 					await resendLeaderboard(this.school, course);
+				} else if(packet.type == "getSection") {
+					console.log(packet);
+					if(packet.section == undefined) {
+						this.ws.send(JSON.stringify({type: "getSection", success: false, error: "Missing section id"}));
+						return;
+					}
+					const course = await this.room.$get("course");
+					if(course == null) return;
+					const s = await course.$get("students");
+					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
+					if(!student) return;
+					if(!(packet.section <= student.section)) {
+						this.ws.send(JSON.stringify({type: "getSection", success: false, error: "You have not completed the previous section yet"}));
+						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
+						return;
+					}
+					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 				}
 			}
 		});

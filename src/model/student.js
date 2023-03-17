@@ -73,6 +73,20 @@ __decorate([
     })
 ], Student.prototype, "achievementdata", void 0);
 __decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.NUMBER,
+        defaultValue: 0
+    })
+], Student.prototype, "section", void 0);
+__decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.NUMBER,
+        defaultValue: 0
+    })
+], Student.prototype, "totalLevels", void 0);
+__decorate([
     ForeignKey(() => Course)
 ], Student.prototype, "courseUuid", void 0);
 __decorate([

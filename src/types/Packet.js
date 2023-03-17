@@ -127,17 +127,23 @@ export const InInfoPacket = z.object({
 });
 export const InTaskPacket = z.object({
     type: z.literal("task"),
-    level: z.number()
+    level: z.number(),
+    section: z.number()
 });
 export const InDonePacket = z.object({
     type: z.literal("done"),
     level: z.number(),
     answeredqs: z.number().optional(),
     correctqs: z.number().optional(),
+    section: z.number()
 });
 export const InIdleStateChangePacket = z.object({
     type: z.literal("idleStateChange"),
     idle: z.boolean()
+});
+export const InGetSectionPacket = z.object({
+    type: z.literal("getSection"),
+    section: z.number()
 });
 export const InStudentPackets = z.union([
     InRoomPacket,
@@ -145,7 +151,8 @@ export const InStudentPackets = z.union([
     InInfoPacket,
     InTaskPacket,
     InDonePacket,
-    InIdleStateChangePacket
+    InIdleStateChangePacket,
+    InGetSectionPacket
 ]);
 export const InPacket = z.union([
     InHiPacket,

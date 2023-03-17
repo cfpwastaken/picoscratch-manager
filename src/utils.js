@@ -18,14 +18,31 @@ export function hasJsonStructure(str) {
     }
 }
 export const validClientTypes = ["teacher", "student"];
-export function studentLevelpath(student, tasks) {
-    const infos = tasks.map((task, index) => {
+export function studentSections(student, tasks) {
+    return {
+        sections: tasks.map((section) => {
+            return {
+                name: section.name,
+                desc: section.desc,
+                img: section.img
+            };
+        }).slice(0, student.section + 1),
+        total: tasks.length
+    };
+}
+export function studentLevelpath(student, tasks, section) {
+    const infos = tasks[section].tasks.map((task, index) => {
         return {
             name: task.name,
             desc: task.desc
         };
-    }).filter((_, index) => index < (student.level + 1)).filter((_, index) => index != 0);
-    return { done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length, infos };
+    }).filter((_, index) => {
+        if (student.section != section)
+            return true;
+        if (index < (student.level + 1))
+            return true;
+    });
+    return { done: student.section != section ? tasks[section].tasks.length : student.level, locked: student.section != section ? 0 : (tasks[section].tasks.length - 1 - student.level), isDone: student.section != section ? true : student.level == tasks[section].tasks.length, infos };
 }
 export function isWhatPercentOf(numA, numB) {
     return (numA / numB) * 100;
@@ -41,11 +58,11 @@ export async function courseLeaderboardJSON(course) {
         const percent = isWhatPercentOf(s.correctqs, s.answeredqs);
         return {
             name: s.name,
-            level: s.level,
+            level: s.totalLevels,
             answeredqs: s.answeredqs,
             correctqs: s.correctqs,
             percentage: isNaN(percent) ? 100 : Math.floor(percent),
-            xp: ((s.level - 1) * 1357) + (s.correctqs * 136),
+            xp: ((s.totalLevels - 1) * 1357) + (s.correctqs * 136),
             achievements: s.achievements,
             achievementdata: s.achievementdata,
             uuid: s.uuid,

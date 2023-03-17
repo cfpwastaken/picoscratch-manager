@@ -124,10 +124,19 @@ export const ReadingTask = z.object({
 
 export const Task = z.union([RegularTask, ReadingTask]);
 
-export const Tasks = z.array(Task);
+export const Section = z.object({
+	name: z.string(),
+	desc: z.string(),
+	img: z.string().optional(),
+	tasks: z.array(Task)
+});
+
+// export const Tasks = z.array(Task);
+export const Tasks = z.array(Section);
 
 // TS Types
 export type Task = z.infer<typeof Task>;
+export type Section = z.infer<typeof Section>;
 export type Tasks = z.infer<typeof Tasks>;
 export type RegularTask = z.infer<typeof RegularTask>;
 export type ReadingTask = z.infer<typeof ReadingTask>;

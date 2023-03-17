@@ -70,6 +70,20 @@ export default class Student extends Model {
 	})
 	declare achievementdata: {lastday: number, completedLevels: number};
 
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.NUMBER,
+		defaultValue: 0
+	})
+	declare section: number;
+
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.NUMBER,
+		defaultValue: 0
+	})
+	declare totalLevels: number;
+
   @ForeignKey(() => Course)
 	declare courseUuid: string;
 
