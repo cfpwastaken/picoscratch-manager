@@ -5,6 +5,7 @@ import Room from "./model/room.js";
 import School from "./model/school.js";
 import Student from "./model/student.js";
 import Teacher from "./model/teacher.js";
+import { Tasks } from "./types/Task.js";
 
 export function hasJsonStructure(str: string) {
 	if(typeof str !== "string") return false;
@@ -20,8 +21,15 @@ export function hasJsonStructure(str: string) {
 
 export const validClientTypes = ["teacher", "student"];
 
-export function studentLevelpath(student: Student) {
-	return {done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length};
+export function studentLevelpath(student: Student, tasks: Tasks) {
+	const infos = tasks.map((task, index) => {
+		return {
+			name: task.name,
+			desc: task.desc
+		}
+	}).filter((_, index) => index < (student.level + 1)).filter((_, index) => index != 0);
+
+	return {done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length, infos};
 }
 
 export function isWhatPercentOf(numA: number, numB: number) {

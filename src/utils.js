@@ -1,5 +1,5 @@
 import { compare } from "bcrypt";
-import { loggedIn, tasks } from "./main.js";
+import { loggedIn } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
@@ -18,8 +18,14 @@ export function hasJsonStructure(str) {
     }
 }
 export const validClientTypes = ["teacher", "student"];
-export function studentLevelpath(student) {
-    return { done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length };
+export function studentLevelpath(student, tasks) {
+    const infos = tasks.map((task, index) => {
+        return {
+            name: task.name,
+            desc: task.desc
+        };
+    }).filter((_, index) => index < (student.level + 1)).filter((_, index) => index != 0);
+    return { done: student.level - 1, locked: (tasks.length - 1 - student.level), isDone: student.level == tasks.length, infos };
 }
 export function isWhatPercentOf(numA, numB) {
     return (numA / numB) * 100;

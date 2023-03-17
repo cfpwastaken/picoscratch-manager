@@ -27,6 +27,7 @@ const rawTasks = JSON.parse(await readFile("tasks.json", "utf8"));
 Tasks.parse(rawTasks); // If this fails, the app will error out, as there is no reason to continue if the tasks are invalid
 
 export const tasks = rawTasks as Tasks;
+export const demoTasks = tasks.slice(0, 4);
 let errored: boolean = false;
 
 process.on("uncaughtException", (err) => {

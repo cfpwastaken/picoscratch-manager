@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { lastPing, loggedIn, tasks } from "./main.js";
+import { lastPing, loggedIn, tasks, demoTasks } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
@@ -135,6 +135,12 @@ export class Connection {
                         this.ws.send(JSON.stringify({ type: "addTeacher", success: false, error: "Missing name or password" }));
                         return;
                     }
+                    if (this.school.isDemo) {
+                        if ((await this.school.$count("teachers")) >= 10) {
+                            this.ws.send(JSON.stringify({ type: "addTeacher", success: false, error: "Demo schools can only have up to 10 teachers" }));
+                            return;
+                        }
+                    }
                     const t = await this.school.$create("teacher", { name: packet.username, password: packet.password });
                     this.ws.send(JSON.stringify({ type: "addTeacher", success: true, teacher: t }));
                     broadcastAdmins(this.school, { type: "addTeacher", teacher: t }, this.cid);
@@ -159,6 +165,12 @@ export class Connection {
                         this.ws.send(JSON.stringify({ type: "addCourse", success: false, error: "Missing name" }));
                         return;
                     }
+                    if (this.school.isDemo) {
+                        if ((await this.school.$count("courses")) >= 10) {
+                            this.ws.send(JSON.stringify({ type: "addCourse", success: false, error: "Demo schools can only have up to 10 courses" }));
+                            return;
+                        }
+                    }
                     const c = await this.school.$create("course", { name: packet.name });
                     this.ws.send(JSON.stringify({ type: "addCourse", success: true, course: c }));
                     broadcastAdmins(this.school, { type: "addCourse", course: c }, this.cid);
@@ -182,6 +194,12 @@ export class Connection {
                     if (!packet.name) {
                         this.ws.send(JSON.stringify({ type: "addRoom", success: false, error: "Missing name" }));
                         return;
+                    }
+                    if (this.school.isDemo) {
+                        if ((await this.school.$count("rooms")) >= 10) {
+                            this.ws.send(JSON.stringify({ type: "addRoom", success: false, error: "Demo schools can only have up to 10 rooms" }));
+                            return;
+                        }
                     }
                     const r = await this.school.$create("room", { name: packet.name });
                     this.ws.send(JSON.stringify({ type: "addRoom", success: true, room: r }));
@@ -419,7 +437,7 @@ export class Connection {
                     await student.save();
                     const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
                     if (logged) {
-                        logged.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                        logged.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks) }));
                     }
                     // for(const logged of loggedIn) {
                     // 	if(logged.clientType == "student") {
@@ -478,7 +496,8 @@ export class Connection {
                     this.uuid = student.uuid;
                     this.idle = false;
                     this.ws.send(JSON.stringify({ type: "login", success: true, student }));
-                    this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                    const levelpath = studentLevelpath(student, this.school.isDemo ? demoTasks : tasks);
+                    this.ws.send(JSON.stringify({ type: "levelpath", ...levelpath }));
                     this.ws.send(JSON.stringify({ type: "leaderboard", leaderboard: await courseLeaderboardJSON(course) }));
                     await resendLeaderboard(this.school, course);
                     return;
@@ -513,12 +532,12 @@ export class Connection {
                         return;
                     if (!(packet.level <= student.level)) {
                         this.ws.send(JSON.stringify({ type: "task", success: false, error: "You have not completed the previous level yet" }));
-                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks) }));
                         return;
                     }
                     if (!tasks[packet.level]) {
                         this.ws.send(JSON.stringify({ type: "task", success: false, error: "Level not found" }));
-                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks) }));
                         return;
                     }
                     this.ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.level] }));
@@ -544,7 +563,7 @@ export class Connection {
                         return;
                     if (!tasks[packet.level]) {
                         this.ws.send(JSON.stringify({ type: "done", success: false, error: "Level not found" }));
-                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks) }));
                         return;
                     }
                     student.level++;
@@ -581,7 +600,7 @@ export class Connection {
                     // broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
                     // broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
                     await resendLeaderboard(this.school, course);
-                    ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student) }));
+                    ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks) }));
                 }
                 else if (packet.type == "idleStateChange") {
                     if (packet.idle === undefined) {
