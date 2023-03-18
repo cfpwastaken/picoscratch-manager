@@ -24,7 +24,7 @@ export default class Student extends Model {
 	@AllowNull(false)
 	@Column({
 		type: DataTypes.INTEGER,
-		defaultValue: 1
+		defaultValue: 0
 	})
 	declare level: number;
 

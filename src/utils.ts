@@ -68,7 +68,7 @@ export async function courseLeaderboardJSON(course: Course) {
 			answeredqs: s.answeredqs,
 			correctqs: s.correctqs,
 			percentage: isNaN(percent) ? 100 : Math.floor(percent),
-			xp: ((s.totalLevels - 1) * 1357) + (s.correctqs * 136),
+			xp: (s.totalLevels * 1357) + (s.correctqs * 136) + (s.section * 1000),
 			achievements: s.achievements,
 			achievementdata: s.achievementdata,
 			uuid: s.uuid,
