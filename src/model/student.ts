@@ -72,14 +72,14 @@ export default class Student extends Model {
 
 	@AllowNull(false)
 	@Column({
-		type: DataTypes.NUMBER,
+		type: DataTypes.INTEGER,
 		defaultValue: 0
 	})
 	declare section: number;
 
 	@AllowNull(false)
 	@Column({
-		type: DataTypes.NUMBER,
+		type: DataTypes.INTEGER,
 		defaultValue: 0
 	})
 	declare totalLevels: number;
