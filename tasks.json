@@ -76,6 +76,32 @@
 						"correct": 2
 					}
 				]
+			},
+			{
+				"name": "Temperatur messen",
+				"desc": "Wie warm ist es im Pico?",
+				"instructions": [
+					{
+						"text": "Nehme ein \"Wiederhole fortlaufend\" Block und ziehe ihn in den \"Wenn grüne Flagge geklickt\" Block",
+						"block": "control_forever",
+						"previousBlock": "event_whenflagclicked"
+					},
+					{
+						"text": "Nehme einen \"Gebe () in der Konsole aus\" Block und ziehe ihn in den \"Wiederhole\" Block",
+						"block": "debug_print",
+						"parentBlock": "control_forever"
+					},
+					{
+						"text": "Nehme einen \"Mikrokontroller Temperatur (°C)\" Block und ziehe ihn in den \"Gebe in der Konsole aus\" Block",
+						"block": "components_internaltemp",
+						"parentBlock": "debug_print"
+					},
+					{
+						"text": "Baue eine Pause ein",
+						"block": "control_wait",
+						"previousBlock": "debug_print"
+					}
+				]
 			}
 		]
 	},
@@ -254,15 +280,52 @@
 						"to": "26"
 					},
 					{
-						"text": "Baue eine Pause ein",
-						"block": "control_wait",
+						"text": "Nehme einen \"falls ... sonst\" Block und setze ihn unter den \"Gebe ... in der Konsole aus\" Block",
+						"block": "control_if_else",
 						"previousBlock": "debug_print"
 					},
 					{
-						"type": "dialog",
-						"title": "Ausprobieren",
-						"text": "Starte den Code, verbinde nun das rote Kabel mit der LED und schau in der Konsole, wie sich der Wert verändert.",
-						"closeButton": "Ok"
+						"text": "Nehme einen \"() < ()\" Block und setze ihn in den \"falls\" Block",
+						"block": "operator_lt",
+						"parentBlock": "control_if_else",
+						"blockTag": "lt"
+					},
+					{
+						"text": "Nehme einen \"Fotoresistor ... Lichtlevel\" Block und setze ihn in den ersten Platzhalter",
+						"block": "components_photoresistor",
+						"parentBlock": "operator_lt",
+						"blockTag": "photoresistor"
+					},
+					{
+						"type": "changeblock",
+						"text": "Gebe den PIN 26 ein",
+						"targetBlockTag": "photoresistor",
+						"name": "NUM",
+						"to": "26"
+					},
+					{
+						"type": "changeblock",
+						"text": "Gebe den Schwellwert 245 in das zweite Feld ein",
+						"targetBlockTag": "lt",
+						"name": "TEXT",
+						"to": "245"
+					},
+					{
+						"text": "Nehme einen \"Schalte LED ein\" Block und setze ihn in den \"falls\" Block",
+						"block": "components_ledon",
+						"parentBlock": "control_if_else",
+						"parentStack": "SUBSTACK"
+					},
+					{
+						"text": "Nehme einen \"Schalte LED aus\" Block und setze ihn in den \"sonst\" Block",
+						"block": "components_ledoff",
+						"parentBlock": "control_if_else",
+						"parentStack": "SUBSTACK2"
+					},
+					{
+						"text": "Baue eine Pause ein",
+						"block": "control_wait",
+						"previousBlock": "control_if_else"
 					}
 				]
 			},

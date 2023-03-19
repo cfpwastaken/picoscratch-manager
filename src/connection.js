@@ -528,10 +528,12 @@ export class Connection {
                         this.ws.send(JSON.stringify({ type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks) }));
                         return;
                     }
-                    if (!(packet.level <= student.level)) {
-                        this.ws.send(JSON.stringify({ type: "task", success: false, error: "You have not completed the previous level yet" }));
-                        this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section) }));
-                        return;
+                    if (student.section == packet.section) {
+                        if (!(packet.level <= student.level)) {
+                            this.ws.send(JSON.stringify({ type: "task", success: false, error: "You have not completed the previous level yet" }));
+                            this.ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section) }));
+                            return;
+                        }
                     }
                     if (!tasks[packet.section].tasks[packet.level]) {
                         this.ws.send(JSON.stringify({ type: "task", success: false, error: "Level not found" }));

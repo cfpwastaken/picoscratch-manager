@@ -26,7 +26,7 @@ __decorate([
     AllowNull(false),
     Column({
         type: DataTypes.INTEGER,
-        defaultValue: 1
+        defaultValue: 0
     })
 ], Student.prototype, "level", void 0);
 __decorate([
@@ -75,14 +75,14 @@ __decorate([
 __decorate([
     AllowNull(false),
     Column({
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0
     })
 ], Student.prototype, "section", void 0);
 __decorate([
     AllowNull(false),
     Column({
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0
     })
 ], Student.prototype, "totalLevels", void 0);
