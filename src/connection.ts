@@ -9,6 +9,9 @@ import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, cour
 import { WebSocket } from "ws";
 import { InPacket, InTeacherHiPacket } from "./types/Packet.js";
 
+const TASK_VERIFICATION_NEEDED = true;
+const awaitingVerification: { [key: string]: { uuid: string, packet: object, verified: boolean }[] } = {};
+
 function broadcastAdmins(school: School, packet: object, exceptCID?: string) {
 	for(const connection of loggedIn) {
 		if(exceptCID && connection.cid == exceptCID) continue;
@@ -42,6 +45,28 @@ async function resendLeaderboard(school: School, course: Course) {
 	const leaderboard = await courseLeaderboardJSON(course);
 	await broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard});
 	broadcastTeachers(school, {type: "leaderboard", course, leaderboard});
+}
+
+function sendVerifications(courseUUID: string, ws: WebSocket) {
+	ws.send(JSON.stringify(getVerifications(courseUUID)));
+}
+
+function getVerifications(courseUUID: string) {
+	if(!awaitingVerification[courseUUID]) {
+		return {type: "verifications", verifications: []};
+	}
+	return { type: "verifications", verifications: awaitingVerification[courseUUID].map(v => {
+		const logged = loggedIn.find(l => l.uuid == v.uuid);
+		if(!logged) return null;
+		return {
+			uuid: logged.uuid,
+			name: logged.name
+		}
+	}) };
+}
+
+function broadcastVerifications(school: School, courseUUID: string, exceptCID?: string) {
+	broadcastTeachers(school, getVerifications(courseUUID), exceptCID);
 }
 
 export class Connection {
@@ -432,6 +457,25 @@ export class Connection {
 					// 	}
 					// }
 					// await resendLeaderboard(this.school, course);
+				} else if(packet.type == "getVerifications") {
+					sendVerifications(packet.course, ws);
+				} else if(packet.type == "verify") {
+					const verification = awaitingVerification[packet.course].find(v => v.uuid == packet.uuid);
+					if(!verification) return;
+					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == packet.uuid);
+					verification.verified = true;
+					if(logged) {
+						logged.ws.emit("message", JSON.stringify(verification.packet));
+					}
+				} else if(packet.type == "dismiss") {
+					const verification = awaitingVerification[packet.course].find(v => v.uuid == packet.uuid);
+					if(!verification) return;
+					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == packet.uuid);
+					if(logged) {
+						logged.ws.send(JSON.stringify({type: "dismiss"}));
+					}
+					awaitingVerification[packet.course] = awaitingVerification[packet.course].filter(v => v.uuid != packet.uuid);
+					broadcastVerifications(this.school, packet.course);
 				}
 			}
 			if(this.clientType == "student") {
@@ -535,56 +579,76 @@ export class Connection {
 						return;
 					}
 					if(packet.level != student.level) return;
-					if(!tasks[packet.level]) {
+					if(!tasks[packet.section].tasks[packet.level]) {
 						this.ws.send(JSON.stringify({type: "done", success: false, error: "Level not found"}));
 						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 						return;
 					}
-					student.level++;
-					student.totalLevels++;
-					if(packet.answeredqs) student.answeredqs += packet.answeredqs;
-					if(packet.correctqs) student.correctqs += packet.correctqs;
-					student.achievementdata.completedLevels++;
-					if(student.achievementdata.completedLevels == 5) {
-						if(!student.achievements.includes("fast")) {
-							student.achievements.push("fast");
+					let canContinue = true;
+					if(TASK_VERIFICATION_NEEDED) {
+						if(!awaitingVerification[course.uuid]?.find(v => v.uuid == this.uuid)?.verified) canContinue = false;
+						if(tasks[packet.section].tasks[packet.level].type == "reading") canContinue = true;
+					}
+					if(canContinue) {
+						student.level++;
+						student.totalLevels++;
+						if(packet.answeredqs) student.answeredqs += packet.answeredqs;
+						if(packet.correctqs) student.correctqs += packet.correctqs;
+						student.achievementdata.completedLevels++;
+						if(student.achievementdata.completedLevels == 5) {
+							if(!student.achievements.includes("fast")) {
+								student.achievements.push("fast");
+							}
 						}
-					}
-					// If the student has completed all the levels in the section, move them to the next section
-					console.log("Student level", student.level);
-					console.log("Tasks length", tasks[packet.section].tasks.length);
-					if(student.level >= tasks[packet.section].tasks.length) {
-						console.log("Moving to next section");
-						student.section++;
-						student.level = 0;
-						await student.save();
-						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-						this.ws.send(JSON.stringify({ type: "sectionDone" }));
-					}
-					await student.save();
-					const leaderboard = await courseLeaderboardJSON(course);
-					if(leaderboard[0] == leaderboard.find(u => u.name == capitalizeWords(this.name.split(" ")).join(" "))) {
-						if(!student.achievements.includes("first")) {
-							student.achievements.push("first");
+						// If the student has completed all the levels in the section, move them to the next section
+						console.log("Student level", student.level);
+						console.log("Tasks length", tasks[packet.section].tasks.length);
+						if(student.level >= tasks[packet.section].tasks.length) {
+							console.log("Moving to next section");
+							student.section++;
+							student.level = 0;
 							await student.save();
+							this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
+							this.ws.send(JSON.stringify({ type: "sectionDone" }));
 						}
+						await student.save();
+						const leaderboard = await courseLeaderboardJSON(course);
+						if(leaderboard[0] == leaderboard.find(u => u.name == capitalizeWords(this.name.split(" ")).join(" "))) {
+							if(!student.achievements.includes("first")) {
+								student.achievements.push("first");
+								await student.save();
+							}
+						}
+						// for(const logged of loggedIn) {
+						// 	if(logged.clientType == "student") {
+						// 		if(!logged.room) continue;
+						// 		const c = await logged.room.getCourse();
+						// 		if(!c) continue;
+						// 		if(!c.uuid == c.uuid) continue;
+						// 		logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
+						// 	} else if(logged.clientType == "teacher") {
+						// 		if(logged.school.uuid != this.school.uuid) continue;
+						// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
+						// 	}
+						// }
+						// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
+						// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
+						await resendLeaderboard(this.school, course);
+						ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
+						ws.send(JSON.stringify({type: "done", success: true}));
+						if(awaitingVerification[course.uuid]?.find(v => v.uuid == this.uuid)?.verified) {
+							awaitingVerification[course.uuid] = awaitingVerification[course.uuid].filter(v => v.uuid != this.uuid);
+							broadcastVerifications(this.school, course.uuid);
+						}
+					} else {
+						if(!awaitingVerification[course.uuid]) awaitingVerification[course.uuid] = [];
+						if(awaitingVerification[course.uuid].find(v => v.uuid == this.uuid)) {
+							this.ws.send(JSON.stringify({type: "done", success: false, error: "You have already submitted a task for verification"}));
+							return;
+						}
+						awaitingVerification[course.uuid].push({ uuid: this.uuid, packet, verified: false });
+						broadcastVerifications(this.school, course.uuid);
 					}
-					// for(const logged of loggedIn) {
-					// 	if(logged.clientType == "student") {
-					// 		if(!logged.room) continue;
-					// 		const c = await logged.room.getCourse();
-					// 		if(!c) continue;
-					// 		if(!c.uuid == c.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
-					// 	} else if(logged.clientType == "teacher") {
-					// 		if(logged.school.uuid != this.school.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
-					// 	}
-					// }
-					// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
-					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
-					await resendLeaderboard(this.school, course);
-					ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 				} else if(packet.type == "idleStateChange") {
 					if(packet.idle === undefined) {
 						this.ws.send(JSON.stringify({type: "idleStateChange", success: false, error: "Missing idle state"}));
@@ -621,9 +685,14 @@ export class Connection {
 			loggedIn.splice(loggedIn.indexOf(this), 1);
 			if(this.clientType == "student") {
 				if(!this.room) return;
+				if(!this.uuid) return;
 				const course = await this.room.$get("course");
 				if(course == null) return;
 				await resendLeaderboard(this.school, course);
+				if(awaitingVerification[course.uuid] && awaitingVerification[course.uuid].find(v => v.uuid == this.uuid)) {
+					awaitingVerification[course.uuid].splice(awaitingVerification[course.uuid].findIndex(v => v.uuid == this.uuid), 1);
+					broadcastVerifications(this.school, course.uuid);
+				}
 			}
 		});
 	}

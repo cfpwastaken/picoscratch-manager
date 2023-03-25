@@ -48,7 +48,8 @@
 		"course": "Kurs",
 		"show": "Anzeigen",
 		"hide": "Verstecken",
-		"login-btn": "Anmelden"
+		"login-btn": "Anmelden",
+		"task-verification": "Aufgabenüberprüfung"
 	},
 	"en": {
 		"picoscratch-manager": "PicoScratch Manager",
@@ -99,6 +100,7 @@
 		"course": "Course",
 		"show": "Show",
 		"hide": "Hide",
-		"login-btn": "Login"
+		"login-btn": "Login",
+		"task-verification": "Task verification"
 	}
 }

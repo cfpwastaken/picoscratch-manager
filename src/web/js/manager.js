@@ -152,6 +152,18 @@ ws.addEventListener("message", async (msg) => {
 		}
 		$("[data-course-item=\"" + packet.uuid + "\"] h2").innerText = packet.name;
 		$("[data-course-nav=\"" + packet.uuid + "\"]").childNodes[1].nodeValue = " " + packet.name;
+	} else if(packet.type == "verifications") {
+		console.log(packet.verifications);
+		$("#task-verification-counter").innerText = packet.verifications.length;
+		if(packet.verifications.length == 0) {
+			$("#task-verification-counter").style.display = "none";
+			$("#verify-student").style.display = "none";
+			return;
+		}
+		$("#task-verification-counter").style.display = "";
+		$("#verify-student").style.display = "flex";
+		$("#task-verification-student").innerText = packet.verifications[0].name;
+		$("#verify-student").setAttribute("data-studentuuid", packet.verifications[0].uuid);
 	}
 })
 
@@ -343,6 +355,7 @@ function createCourseNavItem(course) {
 			$("#traffic-green").classList.add("trafficOff");
 		}
 		ws.send(JSON.stringify({type: "getCourseInfo", uuid: course.uuid}));
+		ws.send(JSON.stringify({type: "getVerifications", course: course.uuid}));
 	});
 	navItems.push(h3);
 }
@@ -696,3 +709,11 @@ $("#hide-absents-button").addEventListener("click", () => {
 	$("#hide-absents-button").style.display = "none";
 	$("#show-absents-button").style.display = "";
 });
+
+$("#verify-task").addEventListener("click", () => {
+	ws.send(JSON.stringify({ type: "verify", uuid: $("#verify-student").getAttribute("data-studentuuid"), course: selectedCourse.uuid }));
+})
+
+$("#decline-verification").addEventListener("click", () => {
+	ws.send(JSON.stringify({ type: "dismiss", uuid: $("#verify-student").getAttribute("data-studentuuid"), course: selectedCourse.uuid }));
+})

@@ -360,7 +360,6 @@ button:active:not(:disabled) {
 }
 
 tr:nth-child(2) {
-	// Make this column a bit wider, and the other ones smaller
 	width: 30%;
 }
 

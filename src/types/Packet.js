@@ -104,6 +104,20 @@ export const InSetLevelPacket = z.object({
     courseUUID: z.string(),
     level: z.number()
 });
+export const InGetVerificationsPacket = z.object({
+    type: z.literal("getVerifications"),
+    course: z.string()
+});
+export const InVerifyPacket = z.object({
+    type: z.literal("verify"),
+    uuid: z.string(),
+    course: z.string()
+});
+export const InDismissPacket = z.object({
+    type: z.literal("dismiss"),
+    uuid: z.string(),
+    course: z.string()
+});
 export const InTeacherPackets = z.union([
     InSetActiveCoursePacket,
     InStartCoursePacket,
@@ -111,7 +125,10 @@ export const InTeacherPackets = z.union([
     InGetCourseInfoPacket,
     InKickPacket,
     InDeletePacket,
-    InSetLevelPacket
+    InSetLevelPacket,
+    InGetVerificationsPacket,
+    InVerifyPacket,
+    InDismissPacket
 ]);
 export const InRoomPacket = z.object({
     type: z.literal("room"),
