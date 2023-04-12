@@ -155,15 +155,44 @@ ws.addEventListener("message", async (msg) => {
 	} else if(packet.type == "verifications") {
 		console.log(packet.verifications);
 		$("#task-verification-counter").innerText = packet.verifications.length;
-		if(packet.verifications.length == 0) {
-			$("#task-verification-counter").style.display = "none";
-			$("#verify-student").style.display = "none";
-			return;
+		// if(packet.verifications.length == 0) {
+		// 	$("#task-verification-counter").style.display = "none";
+		// 	$("#verify-student").style.display = "none";
+		// 	return;
+		// }
+		// $("#task-verification-counter").style.display = "";
+		// $("#verify-student").style.display = "flex";
+		// $("#task-verification-student").innerText = packet.verifications[0].name;
+		// $("#verify-student").setAttribute("data-studentuuid", packet.verifications[0].uuid);
+		$("#verify-students").innerHTML = "";
+		for(let i = 0; i < packet.verifications.length; i++) {
+			const verification = packet.verifications[i];
+			const div = document.createElement("div");
+			div.classList.add("verify-student");
+			div.style.display = "flex";
+			// if(i != 0) div.style.display = "none";
+			const absent = document.createElement("absent-student");
+			absent.innerText = verification.name;
+			div.appendChild(absent);
+			const actions = document.createElement("div");
+			actions.id = "actions";
+			const decline = document.createElement("button");
+			decline.classList.add("verify-student-decline");
+			decline.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4.21 4.387.083-.094a1 1 0 0 1 1.32-.083l.094.083L12 10.585l6.293-6.292a1 1 0 1 1 1.414 1.414L13.415 12l6.292 6.293a1 1 0 0 1 .083 1.32l-.083.094a1 1 0 0 1-1.32.083l-.094-.083L12 13.415l-6.293 6.292a1 1 0 0 1-1.414-1.414L10.585 12 4.293 5.707a1 1 0 0 1-.083-1.32l.083-.094-.083.094Z" fill="#F55050"/></svg>`;
+			decline.addEventListener("click", () => {
+				ws.send(JSON.stringify({ type: "dismiss", uuid: verification.uuid, course: selectedCourse.uuid }));
+			});
+			actions.appendChild(decline);
+			const verify = document.createElement("button");
+			verify.classList.add("verify-student-verify");
+			verify.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.5 16.586-3.793-3.793a1 1 0 0 0-1.414 1.414l4.5 4.5a1 1 0 0 0 1.414 0l11-11a1 1 0 0 0-1.414-1.414L8.5 16.586Z" fill="#50F550"/></svg>`;
+			verify.addEventListener("click", () => {
+				ws.send(JSON.stringify({ type: "verify", uuid: verification.uuid, course: selectedCourse.uuid }));
+			});
+			actions.appendChild(verify);
+			div.appendChild(actions);
+			$("#verify-students").appendChild(div);
 		}
-		$("#task-verification-counter").style.display = "";
-		$("#verify-student").style.display = "flex";
-		$("#task-verification-student").innerText = packet.verifications[0].name;
-		$("#verify-student").setAttribute("data-studentuuid", packet.verifications[0].uuid);
 	}
 })
 
@@ -512,6 +541,13 @@ function renderLeaderboard(leaderboard) {
 		nameWrapper.style.justifyContent = "center";
 		name.appendChild(nameWrapper);
 
+		const avatar = document.createElement("img");
+		avatar.src = "https://api.dicebear.com/6.x/thumbs/png?seed=" + student.name;
+		avatar.style.width = "40px";
+		avatar.style.height = "40px";
+		avatar.style.borderRadius = "100%";
+		nameWrapper.appendChild(avatar);
+
 		const statusIcon = document.createElement("div");
 		statusIcon.classList.add("statusicon");
 		statusIcon.classList.add("status-" + student.status);
@@ -559,6 +595,14 @@ function renderLeaderboard(leaderboard) {
 		});
 		setLevelAction.title = translate("setlevelaction").replaceAll("%s", student.name);
 		actions.appendChild(setLevelAction);
+
+		const approveAction = document.createElement("button");
+		approveAction.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.5 16.586-3.793-3.793a1 1 0 0 0-1.414 1.414l4.5 4.5a1 1 0 0 0 1.414 0l11-11a1 1 0 0 0-1.414-1.414L8.5 16.586Z" fill="#50F550"/></svg>`;
+		approveAction.addEventListener("click", () => {
+			if(!confirm("Are you sure you want to use this failsafe? If the student did not request this, who knows what will happen. The server might crash.")) return;
+			ws.send(JSON.stringify({ type: "verify", uuid: student.uuid, courseUUID: selectedCourse.uuid }));
+		});
+		actions.appendChild(approveAction);
 
 		tr.appendChild(actions);
 		$("#leaderboard table").appendChild(tr);
@@ -709,11 +753,3 @@ $("#hide-absents-button").addEventListener("click", () => {
 	$("#hide-absents-button").style.display = "none";
 	$("#show-absents-button").style.display = "";
 });
-
-$("#verify-task").addEventListener("click", () => {
-	ws.send(JSON.stringify({ type: "verify", uuid: $("#verify-student").getAttribute("data-studentuuid"), course: selectedCourse.uuid }));
-})
-
-$("#decline-verification").addEventListener("click", () => {
-	ws.send(JSON.stringify({ type: "dismiss", uuid: $("#verify-student").getAttribute("data-studentuuid"), course: selectedCourse.uuid }));
-})

@@ -16,7 +16,7 @@
 				"MYSQL_PASSWORD": "secret",
 				"SUBPATH": "/"
 			},
-			"program": "${workspaceFolder}/main.js"
+			"program": "${workspaceFolder}/src/main.js"
 		}
 	]
 }
