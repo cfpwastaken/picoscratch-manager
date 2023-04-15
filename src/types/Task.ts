@@ -112,7 +112,16 @@ export const RegularTask = z.object({
 			CustomBlockArgInstruction,
 			CustomBlockCallInstruction
 		])
-	)
+	),
+	verification: z.object({
+		type: z.enum([
+			"manual", // Require manual verification by a teacher
+			"notneeded", // No verification needed, task is automatically completed
+			"code" // Automatically verify using code
+		]),
+		code: z.string().optional(),
+		correctOutput: z.string().optional()
+	})
 })
 
 export const ReadingTask = z.object({

@@ -32,6 +32,14 @@ function hasJsonStructure(str) {
 	}
 }
 
+function getParameter(key) {
+	return new URLSearchParams(window.location.search).get(key);
+}
+
+if(getParameter("schoolcode")) {
+	loginSchoolcode(getParameter("schoolcode"));
+}
+
 ws.addEventListener("message", async (msg) => {
 	if(!hasJsonStructure(msg.data)) {
 		return;
@@ -542,7 +550,7 @@ function renderLeaderboard(leaderboard) {
 		name.appendChild(nameWrapper);
 
 		const avatar = document.createElement("img");
-		avatar.src = "https://api.dicebear.com/6.x/thumbs/png?seed=" + student.name;
+		avatar.src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + student.name;
 		avatar.style.width = "40px";
 		avatar.style.height = "40px";
 		avatar.style.borderRadius = "100%";
@@ -600,7 +608,7 @@ function renderLeaderboard(leaderboard) {
 		approveAction.innerHTML = `<svg width="40px" height="40px" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.5 16.586-3.793-3.793a1 1 0 0 0-1.414 1.414l4.5 4.5a1 1 0 0 0 1.414 0l11-11a1 1 0 0 0-1.414-1.414L8.5 16.586Z" fill="#50F550"/></svg>`;
 		approveAction.addEventListener("click", () => {
 			if(!confirm("Are you sure you want to use this failsafe? If the student did not request this, who knows what will happen. The server might crash.")) return;
-			ws.send(JSON.stringify({ type: "verify", uuid: student.uuid, courseUUID: selectedCourse.uuid }));
+			ws.send(JSON.stringify({ type: "verify", uuid: student.uuid, course: selectedCourse.uuid }));
 		});
 		actions.appendChild(approveAction);
 

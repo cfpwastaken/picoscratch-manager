@@ -21,7 +21,10 @@
 						"name": "TEXT",
 						"to": "Hallo Welt"
 					}
-				]
+				],
+				"verification": {
+					"type": "notneeded"
+				}
 			},
 			{
 				"name": "Das Steckbrett",
@@ -75,7 +78,10 @@
 						],
 						"correct": 2
 					}
-				]
+				],
+				"verification": {
+					"type": "notneeded"
+				}
 			},
 			{
 				"name": "Temperatur messen",
@@ -101,7 +107,10 @@
 						"block": "control_wait",
 						"previousBlock": "debug_print"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			}
 		]
 	},
@@ -157,7 +166,10 @@
 						],
 						"correct": 1
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			}
 		]
 	},
@@ -212,7 +224,10 @@
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK2"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			},
 			{
 				"name": "LED mit Poti steuern",
@@ -242,7 +257,10 @@
 						"name": "NUM",
 						"to": "26"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			}
 		]
 	},
@@ -327,7 +345,10 @@
 						"block": "control_wait",
 						"previousBlock": "control_if_else"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			},
 			{
 				"name": "RGB cycle",
@@ -646,7 +667,10 @@
 						],
 						"correct": 3
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			},
 			{
 				"name": "Eigene Blöcke",
@@ -796,7 +820,10 @@
 						"name": "TEXT",
 						"to": "2"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			},
 			{
 				"name": "Ultraschall Sensor",
@@ -872,7 +899,10 @@
 						],
 						"correct": 2
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			},
 			{
 				"name": "PIR Sensor",
@@ -920,7 +950,10 @@
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK2"
 					}
-				]
+				],
+				"verification": {
+					"type": "manual"
+				}
 			}
 		]
 	}

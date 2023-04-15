@@ -578,7 +578,10 @@ export class Connection {
 						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
 						return;
 					}
-					if(packet.level != student.level) return;
+					if(packet.level != student.level) {
+						ws.send(JSON.stringify({type: "done", success: true}));
+						return;
+					}
 					if(!tasks[packet.section].tasks[packet.level]) {
 						this.ws.send(JSON.stringify({type: "done", success: false, error: "Level not found"}));
 						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
@@ -587,7 +590,9 @@ export class Connection {
 					let canContinue = true;
 					if(TASK_VERIFICATION_NEEDED) {
 						if(!awaitingVerification[course.uuid]?.find(v => v.uuid == this.uuid)?.verified) canContinue = false;
-						if(tasks[packet.section].tasks[packet.level].type == "reading") canContinue = true;
+						const task = tasks[packet.section].tasks[packet.level];
+						if(task.type == "reading") canContinue = true;
+						if("verification" in task && task.verification.type == "notneeded") canContinue = true;
 					}
 					if(canContinue) {
 						student.level++;
