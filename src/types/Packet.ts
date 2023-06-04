@@ -199,6 +199,39 @@ export const InGetSectionPacket = z.object({
 	section: z.number()
 })
 
+export const InStartGroupPacket = z.object({
+	type: z.literal("startGroup")
+})
+
+export const GroupCode = z.string().min(4).max(4).regex(/^[A-Z0-9]+$/);
+
+export const InJoinGroupPacket = z.object({
+	type: z.literal("joinGroup"),
+	group: GroupCode
+})
+
+export const InGroupCodePacket = z.object({
+	type: z.literal("groupCode"),
+	group: GroupCode,
+	code: z.string()
+})
+
+export const InLeaveGroupPacket = z.object({
+	type: z.literal("leaveGroup"),
+	group: GroupCode
+})
+
+export const InSyncGroupPacket = z.object({
+	type: z.literal("syncGroup"),
+	group: GroupCode
+})
+
+export const InGroupActionPacket = z.object({
+	type: z.literal("groupAction"),
+	group: GroupCode,
+	action: z.any()
+})
+
 export const InStudentPackets = z.union([
 	InRoomPacket,
 	InLoginPacket,
@@ -206,7 +239,13 @@ export const InStudentPackets = z.union([
 	InTaskPacket,
 	InDonePacket,
 	InIdleStateChangePacket,
-	InGetSectionPacket
+	InGetSectionPacket,
+	InStartGroupPacket,
+	InJoinGroupPacket,
+	InGroupCodePacket,
+	InLeaveGroupPacket,
+	InSyncGroupPacket,
+	InGroupActionPacket
 ]);
 
 export const InPacket = z.union([

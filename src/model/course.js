@@ -9,6 +9,7 @@ import { BelongsTo, Column, HasMany, HasOne, Model, AllowNull, PrimaryKey, Table
 import Room from "./room.js";
 import School from "./school.js";
 import Student from "./student.js";
+import CodeGroup from "./codegroups.js";
 let Course = class Course extends Model {
 };
 __decorate([
@@ -42,6 +43,9 @@ __decorate([
 __decorate([
     HasMany(() => Student)
 ], Course.prototype, "students", void 0);
+__decorate([
+    HasMany(() => CodeGroup)
+], Course.prototype, "codeGroups", void 0);
 Course = __decorate([
     Table({
         paranoid: true,

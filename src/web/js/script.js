@@ -32,11 +32,4 @@ document.querySelector("#close-download-dialog").addEventListener("click", () =>
 	document.querySelector("#download-dialog").style.display = "none";
 })
 
-document.querySelector("#register").addEventListener("click", () => {
-	document.querySelector("#register").innerText = "Da hast du Pech!"
-	setTimeout(() => {
-		document.querySelector("#register").innerText = "Register your school"
-	}, 1000);
-})
-
 document.querySelector("#learn-id").value = "";

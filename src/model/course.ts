@@ -3,6 +3,7 @@ import { BelongsTo, Column, HasMany, HasOne, Model, AllowNull, PrimaryKey, Table
 import Room from "./room.js";
 import School from "./school.js";
 import Student from "./student.js";
+import CodeGroup from "./codegroups.js";
 
 @Table({
 	paranoid: true,
@@ -40,5 +41,8 @@ export default class Course extends Model {
 
 	@HasMany(() => Student)
 	declare students: Student[];
+
+	@HasMany(() => CodeGroup)
+	declare codeGroups: CodeGroup[];
 
 }

@@ -14,12 +14,13 @@ import Support from "./model/support.js";
 import { readFile } from "fs/promises";
 import { Connection } from "./connection.js";
 import { Tasks } from "./types/Task.js";
+import CodeGroup from "./model/codegroups.js";
 const __dirname = new URL(".", import.meta.url).pathname;
 
 export const sql = new Sequelize(process.env.MYSQL_DB || "picoscratch", process.env.MYSQL_USER || "picoscratch", process.env.MYSQL_PASSWORD, {
 	host: process.env.MYSQL_HOST || "localhost",
 	dialect: "mariadb",
-	models: [School, Teacher, Course, Student, Room, Support]
+	models: [School, Teacher, Course, Student, Room, Support, CodeGroup]
 })
 
 const rawTasks = JSON.parse(await readFile("tasks.json", "utf8"));
