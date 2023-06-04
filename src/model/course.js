@@ -32,6 +32,13 @@ __decorate([
     })
 ], Course.prototype, "isRunning", void 0);
 __decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    })
+], Course.prototype, "allowRegister", void 0);
+__decorate([
     ForeignKey(() => School)
 ], Course.prototype, "schoolUuid", void 0);
 __decorate([

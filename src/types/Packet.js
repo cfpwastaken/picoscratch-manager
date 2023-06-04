@@ -118,9 +118,14 @@ export const InDismissPacket = z.object({
     uuid: z.string(),
     course: z.string()
 });
-export const InChangePassword = z.object({
+export const InChangePasswordPacket = z.object({
     type: z.literal("changePassword"),
     password: z.string()
+});
+export const InAllowRegisterPacket = z.object({
+    type: z.literal("allowRegister"),
+    course: z.string(),
+    allow: z.boolean()
 });
 export const InTeacherPackets = z.union([
     InSetActiveCoursePacket,
@@ -133,7 +138,8 @@ export const InTeacherPackets = z.union([
     InGetVerificationsPacket,
     InVerifyPacket,
     InDismissPacket,
-    InChangePassword
+    InChangePasswordPacket,
+    InAllowRegisterPacket
 ]);
 export const InRoomPacket = z.object({
     type: z.literal("room"),

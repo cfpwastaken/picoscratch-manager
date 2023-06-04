@@ -495,6 +495,12 @@ export class Connection {
 						this.thisTeacher.password = packet.password;
 						await this.thisTeacher.save();
 					}
+				} else if(packet.type == "allowRegister") {
+					const course = await Course.findOne({where: {uuid: packet.course}});
+					if(!course) return;
+					course.allowRegister = packet.allow;
+					await course.save();
+					broadcastTeachers(this.school, {type: "allowRegister", course: course.uuid, allow: packet.allow});
 				}
 			}
 			if(this.clientType == "student") {
@@ -530,7 +536,12 @@ export class Connection {
 					const s = await course.$get("students");
 					let stud = s.find(s => s.name == capitalizeWords(packet.name.split(" ")).join(" ")) || null;
 					if(!stud) {
-						stud = await course.$create("student", {name: capitalizeWords(packet.name.split(" ")).join(" ")}) as Student;
+						if(course.allowRegister) {
+							stud = await course.$create("student", {name: capitalizeWords(packet.name.split(" ")).join(" ")}) as Student;
+						} else {
+							this.ws.send(JSON.stringify({type: "login", success: false, error: "Teacher has not allowed registration"}));
+							return;
+						}
 					}
 					let student = stud as Student;
 					console.log("STUDENT LOGS IN WITH NAME: " + student.name);

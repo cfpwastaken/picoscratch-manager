@@ -201,6 +201,16 @@ ws.addEventListener("message", async (msg) => {
 			div.appendChild(actions);
 			$("#verify-students").appendChild(div);
 		}
+	} else if(packet.type == "allowRegister") {
+		if(selectedCourse == null) return;
+		if(packet.course == selectedCourse.uuid) {
+			if(packet.allow) {
+				$("#allow-register").innerText = translate("registration-enabled");
+			} else {
+				$("#allow-register").innerText = translate("registration-disabled");
+			}
+			selectedCourse.allowRegister = packet.allow;
+		}
 	}
 })
 
@@ -409,6 +419,11 @@ function createCourseNavItem(course) {
 		} else {
 			$("#traffic-red").classList.remove("trafficOff");
 			$("#traffic-green").classList.add("trafficOff");
+		}
+		if(course.allowRegister) {
+			$("#allow-register").innerText = translate("registration-enabled");
+		} else {
+			$("#allow-register").innerText = translate("registration-disabled");
 		}
 		ws.send(JSON.stringify({type: "getCourseInfo", uuid: course.uuid}));
 		ws.send(JSON.stringify({type: "getVerifications", course: course.uuid}));
@@ -810,4 +825,10 @@ $("#submit-newpassword").addEventListener("click", async () => {
 	}
 	ws.send(JSON.stringify({ type: "changePassword", password: $("#new-password").value }))
 	new Dialog("#change-password-dialog").hide();
+});
+
+
+$("#allow-register").addEventListener("click", () => {
+	const allowed = selectedCourse.allowRegister;
+	ws.send(JSON.stringify({ type: "allowRegister", course: selectedCourse.uuid, allow: !allowed }));
 });

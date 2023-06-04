@@ -30,6 +30,13 @@ export default class Course extends Model {
 	})
 	declare isRunning: boolean;
 
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.BOOLEAN,
+		defaultValue: true
+	})
+	declare allowRegister: boolean;
+
   @ForeignKey(() => School)
   declare schoolUuid: string;
 
