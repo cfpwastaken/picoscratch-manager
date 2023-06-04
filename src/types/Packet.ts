@@ -147,6 +147,11 @@ export const InDismissPacket = z.object({
 	course: z.string()
 })
 
+export const InChangePassword = z.object({
+	type: z.literal("changePassword"),
+	password: z.string()
+})
+
 export const InTeacherPackets = z.union([
 	InSetActiveCoursePacket,
 	InStartCoursePacket,
@@ -157,7 +162,8 @@ export const InTeacherPackets = z.union([
 	InSetLevelPacket,
 	InGetVerificationsPacket,
 	InVerifyPacket,
-	InDismissPacket
+	InDismissPacket,
+	InChangePassword
 ]);
 
 export const InRoomPacket = z.object({

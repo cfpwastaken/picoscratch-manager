@@ -12,7 +12,7 @@ window.ws = ws;
 let schoolCode;
 let username;
 let navItems;
-const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings")];
+const contentItems = [$("#selectsomething"), $("#teachers"), $("#rooms"), $("#courses"), $("#course"), $("#settings"), $("#profile-settings")];
 let selectedCourse;
 let courses = [];
 
@@ -247,6 +247,7 @@ async function loadSchool() {
 		$("#schoolname").appendChild(demoBadge);
 	}
 	username = username.toLowerCase() == "admin" ? "Admin" : school.teachers.find(t => t.name.toLowerCase() === username.toLowerCase()).name;
+	$("#user-profile").src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + encodeURI(username);
 	$("#dashboard-username").innerText = username;
 	role = username.toLowerCase() == "admin" ? "admin" : "teacher";
 	$("#dashboard-role").innerText = translate(role);
@@ -315,10 +316,28 @@ async function loadSchool() {
 	for(const room of school.rooms) {
 		createRoom(room);
 	}
+
+	const profileEl = document.createElement("h3");
+	profileEl.innerText = translate("profile");
+	profileEl.style.marginTop = "auto";
+	profileEl.id = "profile-nav";
+	profileEl.addEventListener("click", () => {
+		for(const item of navItems) {
+			item.classList.remove("active");
+		}
+		profileEl.classList.add("active");
+		for(const item of contentItems) {
+			item.style.display = "none";
+		}
+		selectedCourse = null;
+		$("#profile-settings").style.display = "";
+	});
+	navItems.push(profileEl);
+	$("#nav").appendChild(profileEl);
+
 	if(role == "admin") {
 		const settingsEl = document.createElement("h3");
 		settingsEl.innerText = translate("settings");
-		settingsEl.style.marginTop = "auto";
 		settingsEl.id = "settings-nav";
 		settingsEl.addEventListener("click", () => {
 			for(const item of navItems) {
@@ -369,8 +388,8 @@ function createCourseNavItem(course) {
 	img.src = "../arrow.svg";
 	h3.appendChild(img);
 	h3.appendChild(document.createTextNode(" " + course.name));
-	if($("#settings-nav")) {
-		$("#nav").insertBefore(h3, $("#settings-nav"))
+	if($("#profile-nav")) {
+		$("#nav").insertBefore(h3, $("#profile-nav"))
 	} else {
 		$("#nav").appendChild(h3);
 	}
@@ -436,7 +455,19 @@ function createTeacher(teacher) {
 	div.classList.add("box");
 	div.setAttribute("data-teacher", teacher.uuid);
 	const h2 = document.createElement("h2");
-	h2.innerText = teacher.name;
+	// h2.innerText = teacher.name;
+	h2.style.display = "flex";
+	h2.style.alignItems = "center";
+	h2.style.gap = "10px";
+	const img = document.createElement("img");
+	img.src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + encodeURI(teacher.name);
+	img.style.width = "35px";
+	img.style.height = "35px";
+	img.style.borderRadius = "100%";
+	h2.appendChild(img);
+	const span = document.createElement("span");
+	span.innerText = teacher.name;
+	h2.appendChild(span);
 	div.appendChild(h2);
 	const actions = document.createElement("div");
 	actions.id = "actions";
@@ -760,4 +791,23 @@ $("#hide-absents-button").addEventListener("click", () => {
 	$("#absents").style.display = "none";
 	$("#hide-absents-button").style.display = "none";
 	$("#show-absents-button").style.display = "";
+});
+
+
+
+$("#change-password").addEventListener("click", () => {
+	$("#new-password").value = "";
+	new Dialog("#change-password-dialog").show();
+});
+
+new Dialog("#change-password-dialog").hideButton("#cancel-newpassword");
+
+$("#submit-newpassword").addEventListener("click", async () => {
+	if($("#new-password").value === "") {
+		$("#new-password").focus();
+		$("#new-password").classList.add("error");
+		return;
+	}
+	ws.send(JSON.stringify({ type: "changePassword", password: $("#new-password").value }))
+	new Dialog("#change-password-dialog").hide();
 });

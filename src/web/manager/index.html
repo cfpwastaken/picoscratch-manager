@@ -71,6 +71,14 @@
 				<button style="color: white; font-size: 1.4rem;" id="submit-room" data-lang="ok"></button>
 			</div>
 		</div>
+		<div class="dialog box" id="change-password-dialog" style="display: none;">
+			<h2 data-lang="change-password"></h2>
+			<input id="new-password" type="password" data-lang-placeholder="password" style="margin: 5px;">
+			<div>
+				<button style="color: white; font-size: 1.4rem;" id="cancel-newpassword" data-lang="cancel"></button>
+				<button style="color: white; font-size: 1.4rem;" id="submit-newpassword" data-lang="ok"></button>
+			</div>
+		</div>
 	</div>
 	<div id="login">
 		<h1 style="margin: 5px; margin-bottom: 0;" data-lang="picoscratch-manager"></h1>
@@ -99,7 +107,10 @@
 				<h2 style="margin: 5px;" id="schoolname">Some Schoolname</h2>
 			</div>
 			<div id="user" style="margin-left: auto; text-align: right;">
-				<h2 id="dashboard-username" style="margin: 5px; margin-bottom: 0;"></h2>
+				<h2 style="margin: 5px; margin-bottom: 0; display: flex; gap: 5px; align-items: center;">
+					<img src="" id="user-profile" width="35px" height="35px" style="border-radius: 100%;">
+					<span id="dashboard-username"></span>
+				</h2>
 				<h3 id="dashboard-role" style="margin: 5px;"></h3>
 			</div>
 		</div>
@@ -203,6 +214,16 @@
 							<!-- <h2 style="margin: 0; font-size: 1.4rem;">Rangliste bei Schülern</h2> -->
 						<!-- </div> -->
 					</div>
+				</div>
+				<div id="profile-settings" class="itemlist" style="display: none;">
+					<div class="box">
+						<h2 data-lang="general"></h2>
+						<button data-lang="change-password" id="change-password"></button>
+					</div>
+					<!-- <div class="box">
+						<h2 data-lang="auth"></h2>
+						<button data-lang="add-2fa"></button>
+					</div> -->
 				</div>
 			</div>
 		</div>

@@ -49,7 +49,11 @@
 		"show": "Anzeigen",
 		"hide": "Verstecken",
 		"login-btn": "Anmelden",
-		"task-verification": "Aufgabenüberprüfung"
+		"task-verification": "Aufgabenüberprüfung",
+		"profile": "Profil",
+		"change-password": "Passwort ändern",
+		"auth": "Authentifizierung",
+		"add-2fa": "2FA hinzufügen"
 	},
 	"en": {
 		"picoscratch-manager": "PicoScratch Manager",
@@ -101,6 +105,10 @@
 		"show": "Show",
 		"hide": "Hide",
 		"login-btn": "Login",
-		"task-verification": "Task verification"
+		"task-verification": "Task verification",
+		"profile": "Profile",
+		"change-password": "Change password",
+		"auth": "Authentication",
+		"add-2fa": "Add 2FA"
 	}
 }

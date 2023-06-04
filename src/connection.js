@@ -81,6 +81,7 @@ export class Connection {
     ws;
     uuid;
     idle;
+    thisTeacher;
     constructor(ws) {
         this.ws = ws;
         this.ws.addEventListener("message", async (msg) => {
@@ -131,6 +132,12 @@ export class Connection {
                         return;
                     }
                     this.isAdmin = auth.admin;
+                    if (!(pack.username.toLowerCase() == "admin")) {
+                        const ts = await s.$get("teachers");
+                        const t = ts.find(t => t.name.toLowerCase() == pack.username.toLowerCase());
+                        if (t)
+                            this.thisTeacher = t;
+                    }
                     this.ws.send(JSON.stringify({ type: "hi", success: true, school: this.school, lang: this.school.lang }));
                 }
                 else if (this.clientType == "student") {
@@ -500,6 +507,16 @@ export class Connection {
                     }
                     awaitingVerification[packet.course] = awaitingVerification[packet.course].filter(v => v.uuid != packet.uuid);
                     broadcastVerifications(this.school, packet.course);
+                }
+                else if (packet.type == "changePassword") {
+                    if (this.isAdmin) {
+                        this.school.adminPassword = packet.password;
+                        await this.school.save();
+                    }
+                    else {
+                        this.thisTeacher.password = packet.password;
+                        await this.thisTeacher.save();
+                    }
                 }
             }
             if (this.clientType == "student") {

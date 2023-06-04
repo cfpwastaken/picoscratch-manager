@@ -9,10 +9,10 @@ class AbsentStudent extends HTMLElement {
 		const shadow = this.attachShadow({mode: "open"});
 		shadow.append(absentStudentTemplate.content.cloneNode(true));
 
-		shadow.querySelector("#pic").src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + this.innerText;
+		shadow.querySelector("#pic").src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + encodeURI(this.innerText);
 
     shadow.addEventListener("slotchange", (e) => {
-			shadow.querySelector("#pic").src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + this.innerText;
+			shadow.querySelector("#pic").src = "https://api.dicebear.com/6.x/thumbs/svg?seed=" + encodeURI(this.innerText);
 		});
 	}
 }
