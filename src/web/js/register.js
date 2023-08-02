@@ -22,7 +22,7 @@ $("#submit-password").addEventListener("click", async () => {
 	$("#password-screen").style.display = "none";
 	$("#creating-school").style.display = "flex";
 
-	const code = await fetch("/api/makeSchool", {
+	const code = await fetch("../api/makeSchool", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
