@@ -88,7 +88,7 @@ app.post("/api/makeSchool", async (req, res) => {
         fd.append("secret", SECRET);
         fd.append("response", token);
         fd.append("remoteip", ip);
-        let cf_res = await fetch("https://challenge.cloudflare.com/turnstile/v0/siteverify", {
+        let cf_res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
             method: "POST",
             body: fd
         }).then(res => res.json());
