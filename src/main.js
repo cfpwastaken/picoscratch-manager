@@ -14,6 +14,7 @@ import { readFile } from "fs/promises";
 import { Connection } from "./connection.js";
 import { Tasks } from "./types/Task.js";
 import CodeGroup from "./model/codegroups.js";
+import { z } from "zod";
 const __dirname = new URL(".", import.meta.url).pathname;
 export const sql = new Sequelize(process.env.MYSQL_DB || "picoscratch", process.env.MYSQL_USER || "picoscratch", process.env.MYSQL_PASSWORD, {
     host: process.env.MYSQL_HOST || "localhost",
@@ -79,6 +80,27 @@ function sleep(ms) {
 app.post("/api/makeSchool", async (req, res) => {
     if (!req.body.schoolname || !req.body.password || !req.body.lang)
         return res.status(400).send({ error: "Missing data" });
+    if (process.env.CF_SECRET) {
+        const SECRET = process.env.CF_SECRET;
+        const token = req.body["cf-turnstile-response"];
+        const ip = req.ip;
+        const fd = new FormData();
+        fd.append("secret", SECRET);
+        fd.append("response", token);
+        fd.append("remoteip", ip);
+        let cf_res = await fetch("https://challenge.cloudflare.com/turnstile/v0/siteverify", {
+            method: "POST",
+            body: fd
+        }).then(res => res.json());
+        // zod verify
+        const cf_response = z.object({
+            success: z.boolean()
+        });
+        if (!cf_response.safeParse(cf_res))
+            return void res.status(400).send({ error: "Invalid captcha" });
+        if (!cf_res.success)
+            return void res.status(400).send({ error: "Invalid captcha" });
+    }
     const code = randomCode();
     // const code = "demo" + code.substring(4);
     await sleep(5000);
