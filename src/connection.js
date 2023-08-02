@@ -762,7 +762,9 @@ export class Connection {
                     const course = await this.room.$get("course");
                     if (course == null)
                         return;
-                    const group = await course.$create("codegroup", {});
+                    // const group = await course.$create("codeGroup", {}) as CodeGroup;
+                    const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // 6 character code
+                    const group = await CodeGroup.create({ courseUuid: course.uuid, code });
                     if (!group)
                         return;
                     peopleInGroup[group.uuid] = [this];
@@ -835,6 +837,8 @@ export class Connection {
                 }
                 else if (packet.type == "groupAction") {
                     const people = peopleInGroup[packet.group];
+                    console.log(people);
+                    console.log(peopleInGroup);
                     if (!people)
                         return;
                     for (const person of people) {

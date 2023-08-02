@@ -714,9 +714,11 @@ export class Connection {
 					}
 					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
 				} else if(packet.type == "startGroup") {
-					const course = await this.room.$get("course");
+					const course = await this.room.$get("course") as Course;
 					if(course == null) return;
-					const group = await course.$create("codegroup", {}) as CodeGroup;
+					// const group = await course.$create("codeGroup", {}) as CodeGroup;
+					const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // 6 character code
+					const group = await CodeGroup.create({courseUuid: course.uuid, code});
 					if(!group) return;
 					peopleInGroup[group.uuid] = [this];
 					this.ws.send(JSON.stringify({type: "startGroup", success: true, group}));
@@ -773,6 +775,8 @@ export class Connection {
 					randomPerson.ws.send(JSON.stringify({type: "syncGroup"}));
 				} else if(packet.type == "groupAction") {
 					const people = peopleInGroup[packet.group];
+					console.log(people);
+					console.log(peopleInGroup);
 					if(!people) return;
 					for(const person of people) {
 						if(person == this) continue;

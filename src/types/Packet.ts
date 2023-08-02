@@ -216,7 +216,7 @@ export const InStartGroupPacket = z.object({
 	type: z.literal("startGroup")
 })
 
-export const GroupCode = z.string().min(4).max(4).regex(/^[A-Z0-9]+$/);
+export const GroupCode = z.string().min(6).max(6).regex(/^[A-Z0-9]+$/);
 
 export const InJoinGroupPacket = z.object({
 	type: z.literal("joinGroup"),
@@ -241,7 +241,7 @@ export const InSyncGroupPacket = z.object({
 
 export const InGroupActionPacket = z.object({
 	type: z.literal("groupAction"),
-	group: GroupCode,
+	group: z.string(),
 	action: z.any()
 })
 
