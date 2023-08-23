@@ -42,24 +42,34 @@
 						"previousBlock": "event_whenflagclicked"
 					},
 					{
-						"text": "Nehme ein \"Schalte interne LED an\" Block und ziehe ihn in den \"Wiederhole\" Block",
-						"block": "components_internalledon",
+						"text": "Nehme ein \"Schalte Pin an\" Block und ziehe ihn in den \"Wiederhole\" Block",
+						"block": "pin_on",
 						"parentBlock": "control_forever"
+					},
+					{
+						"text": "Ziehe einen \"Interne LED\" Block in das leere Feld",
+						"block": "internalled",
+						"parentBlock": "pin_on"
 					},
 					{
 						"text": "Baue eine Pause mit einem \"warte (1) Sekunden\" Block",
 						"block": "control_wait",
-						"previousBlock": "components_internalledon"
+						"previousBlock": "pin_on"
 					},
 					{
-						"text": "Schalte die LED wieder aus mit einem \"Schalte interne LED aus\" Block",
-						"block": "components_internalledoff",
+						"text": "Schalte die LED wieder aus mit einem \"Schalte Pin aus\" Block",
+						"block": "pin_off",
 						"previousBlock": "control_wait"
+					},
+					{
+						"text": "Ziehe erneut einen \"Interne LED\" Block in das leere Feld",
+						"block": "internalled",
+						"parentBlock": "pin_off"
 					},
 					{
 						"text": "Baue eine weitere Pause ein.",
 						"block": "control_wait",
-						"previousBlock": "components_internalledoff"
+						"previousBlock": "pin_off"
 					},
 					{
 						"type": "dialog",
@@ -136,24 +146,24 @@
 						"previousBlock": "event_whenflagclicked"
 					},
 					{
-						"text": "Nehme ein \"Schalte LED an\" Block und ziehe ihn in den \"Wiederhole\" Block",
-						"block": "components_ledon",
+						"text": "Nehme ein \"Schalte Pin an\" Block und ziehe ihn in den \"Wiederhole\" Block",
+						"block": "pin_on",
 						"parentBlock": "control_forever"
 					},
 					{
 						"text": "Baue eine Pause mit einem \"warte (1) Sekunden\" Block",
 						"block": "control_wait",
-						"previousBlock": "components_ledon"
+						"previousBlock": "pin_on"
 					},
 					{
 						"text": "Schalte die LED wieder aus mit einem \"Schalte LED aus\" Block",
-						"block": "components_ledoff",
+						"block": "pin_off",
 						"previousBlock": "control_wait"
 					},
 					{
 						"text": "Baue eine weitere Pause ein.",
 						"block": "control_wait",
-						"previousBlock": "components_ledoff"
+						"previousBlock": "pin_off"
 					},
 					{
 						"type": "quiz",
@@ -200,8 +210,8 @@
 						"parentBlock": "control_forever"
 					},
 					{
-						"text": "Ziehe einen \"Ist Knopf gedrückt?\" Block in den \"falls ... sonst\" Block",
-						"block": "components_buttonstatus",
+						"text": "Ziehe einen \"Lese Pin Wert\" Block in den \"falls ... sonst\" Block",
+						"block": "pin_read",
 						"parentBlock": "control_if_else",
 						"blockTag": "btnpressed"
 					},
@@ -213,14 +223,21 @@
 						"to": "1"
 					},
 					{
+						"type": "changeblock",
+						"text": "Füge einen Pull Down Widerstand hinzu",
+						"targetBlockTag": "btnpressed",
+						"name": "PULL",
+						"to": "DOWN"
+					},
+					{
 						"text": "Schalte die LED (Pin 0) ein, wenn ja",
-						"block": "components_ledon",
+						"block": "pin_on",
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK"
 					},
 					{
 						"text": "Schalte die LED (Pin 0) aus, wenn nicht",
-						"block": "components_ledoff",
+						"block": "pin_off",
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK2"
 					}
@@ -240,14 +257,14 @@
 						"previousBlock": "event_whenflagclicked"
 					},
 					{
-						"text": "Nehme einen \"Setze LED helligkeit\" Block",
-						"block": "components_setledbrightness",
+						"text": "Nehme einen \"Setze Pin Tastverhältnis\" Block",
+						"block": "pwm_duty",
 						"parentBlock": "control_forever"
 					},
 					{
-						"text": "Nehme einen \"Potentiometer wert\" Block und setze ihn in das zweite Feld",
-						"block": "components_potentiometer",
-						"parentBlock": "components_setledbrightness",
+						"text": "Nehme einen \"Pin Analogwert\" Block und setze ihn in das zweite Feld",
+						"block": "adc_read",
+						"parentBlock": "pwm_duty",
 						"blockTag": "poti"
 					},
 					{
@@ -285,8 +302,8 @@
 						"parentBlock": "control_forever"
 					},
 					{
-						"text": "Nehme einen \"Fotoresistor ... Lichtlevel\" Block",
-						"block": "components_photoresistor",
+						"text": "Nehme einen \"Pin Analogwert (-> 255)\" Block",
+						"block": "adc_read_255",
 						"parentBlock": "debug_print",
 						"blockTag": "photoresistor"
 					},
@@ -309,8 +326,8 @@
 						"blockTag": "lt"
 					},
 					{
-						"text": "Nehme einen \"Fotoresistor ... Lichtlevel\" Block und setze ihn in den ersten Platzhalter",
-						"block": "components_photoresistor",
+						"text": "Nehme einen \"Pin Analogwert (-> 255)\" Block und setze ihn in den ersten Platzhalter",
+						"block": "adc_read_255",
 						"parentBlock": "operator_lt",
 						"blockTag": "photoresistor"
 					},
@@ -329,14 +346,14 @@
 						"to": "245"
 					},
 					{
-						"text": "Nehme einen \"Schalte LED ein\" Block und setze ihn in den \"falls\" Block",
-						"block": "components_ledon",
+						"text": "Falls der Wert kleiner als 245 ist, schalte die LED ein",
+						"block": "pin_on",
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK"
 					},
 					{
-						"text": "Nehme einen \"Schalte LED aus\" Block und setze ihn in den \"sonst\" Block",
-						"block": "components_ledoff",
+						"text": "Wenn nicht, schalte die LED aus",
+						"block": "pin_off",
 						"parentBlock": "control_if_else",
 						"parentStack": "SUBSTACK2"
 					},
@@ -362,8 +379,8 @@
 						"closeButton": "Ok"
 					},
 					{
-						"text": "Nehme einen \"Setze LED Helligkeit\" Block",
-						"block": "components_setledbrightness",
+						"text": "Nehme einen \"PWM Tastverhältnis (-> 255)\" Block",
+						"block": "pwm_duty_255",
 						"previousBlock": "event_whenflagclicked",
 						"blockTag": "firstresetblock"
 					},
@@ -381,7 +398,7 @@
 					},
 					{
 						"text": "Nehme einen Zweiten",
-						"block": "components_setledbrightness",
+						"block": "pwm_duty_255",
 						"previousTag": "firstresetblock",
 						"blockTag": "secondresetblock"
 					},
@@ -401,7 +418,7 @@
 					},
 					{
 						"text": "Nehme einen Dritten",
-						"block": "components_setledbrightness",
+						"block": "pwm_duty_255",
 						"previousTag": "secondresetblock",
 						"blockTag": "thirdresetblock"
 					},
@@ -432,7 +449,7 @@
 					{
 						"text": "Nehme einen \"Setze Variable auf\" Block",
 						"block": "data_setvariableto",
-						"previousBlock": "components_setledbrightness",
+						"previousBlock": "pwm_duty_255",
 						"blockTag": "setRvar"
 					},
 					{
@@ -462,8 +479,8 @@
 						"content": "Rot-Schleife"
 					},
 					{
-						"text": "Nehme noch mal einen \"Setze LED Helligkeit\" Block",
-						"block": "components_setledbrightness",
+						"text": "Nehme noch mal einen \"PWM Tastverhältnis (-> 255)\" Block",
+						"block": "pwm_duty_255",
 						"parentTag": "rLoop",
 						"blockTag": "rLoopBrightness"
 					},
@@ -531,8 +548,8 @@
 						"content": "Grün-Schleife"
 					},
 					{
-						"text": "Nehme noch mal einen \"Setze LED Helligkeit\" Block",
-						"block": "components_setledbrightness",
+						"text": "Nehme noch mal einen \"PWM Tastverhältnis (-> 255)\" Block",
+						"block": "pwm_duty_255",
 						"parentTag": "gLoop",
 						"blockTag": "gLoopBrightness"
 					},
@@ -607,8 +624,8 @@
 						"content": "Blau-Schleife"
 					},
 					{
-						"text": "Nehme noch mal einen \"Setze LED Helligkeit\" Block",
-						"block": "components_setledbrightness",
+						"text": "Nehme noch mal einen \"PWM Tastverhältnis (-> 255)\" Block",
+						"block": "pwm_duty_255",
 						"parentTag": "bLoop",
 						"blockTag": "bLoopBrightness"
 					},
@@ -676,31 +693,31 @@
 				"name": "Eigene Blöcke",
 				"desc": "Sehr wichtig fürs Programmieren",
 				"noclear": true,
-				"startxml": "<xml xmlns=\"http://www.w3.org/1999/xhtml\"><variables><variable type=\"\" id=\"(}|P`33%1NOiveIj66y9\" islocal=\"false\" iscloud=\"false\">r</variable><variable type=\"\" id=\"?Ap~Lu}C)gM1`s!VT!KY\" islocal=\"false\" iscloud=\"false\">g</variable><variable type=\"\" id=\"m.)raX-J#,hCcD7(O8W(\" islocal=\"false\" iscloud=\"false\">b</variable></variables><block type=\"event_whenflagclicked\" id=\"{!5G[{H3qE2[NMQ;pK)W\" x=\"300\" y=\"400\"><next><block type=\"components_setledbrightness\" id=\"7iMZeHa%[1%8YZjL9hY[\"><comment id=\"~y0sGnp+$t~,PEI4XsOD\" pinned=\"true\" h=\"200\" w=\"200\" x=\"672\" y=\"460\" minimized=\"false\">Zurücksetzen der RGB LED</comment><value name=\"PIN\"><shadow type=\"math_number\" id=\"f+U5Z2LVm}!|}x#T{j^r\"><field name=\"NUM\">0</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"Q/TV4-C6qRh#xeIP;8*k\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"components_setledbrightness\" id=\"0Ca1s%^+$S5gL+7001`V\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"bwt~.%j}4~-O+t-lewu$\"><field name=\"NUM\">1</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"5?NE8e*9$X{hK!RA{u_l\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"components_setledbrightness\" id=\"uNcIV%NaP}YY%uX+Xf=(\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"Mzyv{)k1dVVH#uA:(J21\"><field name=\"NUM\">2</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"*+1-4;:x6{IK0MQCw+]N\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"9A;/l?=b]9*L+mic**k;\"><field name=\"VARIABLE\" id=\"(}|P`33%1NOiveIj66y9\" variabletype=\"\">r</field><comment id=\"eVd$RW33]|Zz1CY{ozw3\" pinned=\"true\" h=\"200\" w=\"200\" x=\"733\" y=\"590.6666666666666\" minimized=\"false\">Setzen der Variablen</comment><value name=\"VALUE\"><shadow type=\"text\" id=\"*:F;]#IefGV`PTq;-vEa\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"S6?Ozvy^J1s!KOJig[V:\"><field name=\"VARIABLE\" id=\"?Ap~Lu}C)gM1`s!VT!KY\" variabletype=\"\">g</field><value name=\"VALUE\"><shadow type=\"text\" id=\"._k^/u_:H,;hU~i$RD?W\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"~?eK.,w-Cu|?8fm,cbpQ\"><field name=\"VARIABLE\" id=\"m.)raX-J#,hCcD7(O8W(\" variabletype=\"\">b</field><value name=\"VALUE\"><shadow type=\"text\" id=\"6WYvkt@ZF~xf{NE?@#^S\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"control_repeat\" id=\"MQjJS[oMVNXDKgiWDNb{\"><comment id=\"2fcs@YMr%NwiR%be`hs8\" pinned=\"true\" h=\"200\" w=\"200\" x=\"753\" y=\"790.6666666666667\" minimized=\"false\">Rot-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\".lWq{$y({/MSZlwg@RfV\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"components_setledbrightness\" id=\"GHQh:QtQpaUnrkubKoP)\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"v(v.9:8#+`q#,4*EZ!{B\"><field name=\"NUM\">0</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"O[.r`4-~=#!e{bI~*U[=\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"l#snZo$q/oS*UZv.X#mR\"><field name=\"VARIABLE\" id=\"(}|P`33%1NOiveIj66y9\" variabletype=\"\">r</field></block></value><next><block type=\"data_changevariableby\" id=\"xpuL+JZ;_!Js0ld^zU|w\"><field name=\"VARIABLE\" id=\"(}|P`33%1NOiveIj66y9\" variabletype=\"\">r</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\"ceRvr8aHVcF91FO:(({p\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"|snO1rxN%Am/LCaLM(8b\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"LMAv]v3@x~NXJl}apkYm\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement><next><block type=\"control_repeat\" id=\"{cj,aX*d.eZ~9mscQwvD\"><comment id=\"1wur6y=l/k8-|6SrBFX7\" pinned=\"true\" h=\"200\" w=\"200\" x=\"780\" y=\"949.3333333333333\" minimized=\"false\">Grün-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\"#$)1}GAodm}ttR?8`W4Y\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"components_setledbrightness\" id=\"5d7$eBwA!r$F,=}Wph/*\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"yTx^(]=$N.O=Lxlobate\"><field name=\"NUM\">1</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"THJO.2;6[smdeV@7=TUG\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"u|/*VSJmTAN_7PbW.pk~\"><field name=\"VARIABLE\" id=\"?Ap~Lu}C)gM1`s!VT!KY\" variabletype=\"\">g</field></block></value><next><block type=\"data_changevariableby\" id=\"-.}{J}aqH2iaNWZPHwe=\"><field name=\"VARIABLE\" id=\"?Ap~Lu}C)gM1`s!VT!KY\" variabletype=\"\">g</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\"BuVVq}KT%*MM+wqc+t#D\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"|,:uI}+DKk%(H(Y/9ywc\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"7Cf8%v7[K4wX8m-Cc%U)\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement><next><block type=\"control_repeat\" id=\"@*YAH@0-%8Rasab8bB^g\"><comment id=\"kNik_Va!,pZuBHvLKXKp\" pinned=\"true\" h=\"200\" w=\"200\" x=\"767\" y=\"1173.3333333333333\" minimized=\"false\">Blau-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\"Q@i@}1TEXz`~A9NHtB!z\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"components_setledbrightness\" id=\"Oi)Kj62Mz)Cd23sHwR*D\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"uz;wT:hIIkp!{T^a@:sY\"><field name=\"NUM\">2</field></shadow></value><value name=\"BRIGHTNESS\"><shadow type=\"math_number\" id=\"Ba?038mH@`Wh2-}?sMsU\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"*ol#Vs;$5;PgTB3|%V@a\"><field name=\"VARIABLE\" id=\"m.)raX-J#,hCcD7(O8W(\" variabletype=\"\">b</field></block></value><next><block type=\"data_changevariableby\" id=\"9zAN(=gY!DO[Ap8VCm90\"><field name=\"VARIABLE\" id=\"m.)raX-J#,hCcD7(O8W(\" variabletype=\"\">b</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\"A_V:hc~.%5Rm+{_QnXI^\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"mkjILpIL{Dq#atg@T`.P\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"P~BBP;n-w3w2O:)I8H`=\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></xml>",
+				"startxml": "<xml xmlns=\"http://www.w3.org/1999/xhtml\"><variables><variable type=\"\" id=\"|4MC6*$J`=t#,$nGETz)\" islocal=\"false\" iscloud=\"false\">r</variable><variable type=\"\" id=\"w$zB)V9NH8Y4--#rgGKI\" islocal=\"false\" iscloud=\"false\">g</variable><variable type=\"\" id=\"7g%dUU0JwY4b[gvHVk{K\" islocal=\"false\" iscloud=\"false\">b</variable></variables><block type=\"event_whenflagclicked\" id=\"{!5G[{H3qE2[NMQ;pK)W\" x=\"300\" y=\"400\"><next><block type=\"pwm_duty_255\" id=\"b`IyldE8C-[uB9C(c7*:\"><comment id=\"idMh4uDWT-{JeFSI=b,G\" pinned=\"true\" h=\"200\" w=\"200\" x=\"751\" y=\"262.66666666666663\" minimized=\"false\">Zurücksetzen der RGB LED</comment><value name=\"PIN\"><shadow type=\"math_number\" id=\"|iq(wE4eT$Hl;[])_$rs\"><field name=\"NUM\">0</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"[WI:FnH}9Qbz~;F]7l|l\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"pwm_duty_255\" id=\"j[]et1;RB$vZAe^uP@(}\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"Hi=I)E={NaxZV`Th]MOF\"><field name=\"NUM\">1</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"0+s!;#]B8d!XkFa50u`w\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"pwm_duty_255\" id=\"4C16B*)#9/*R:AisGi3H\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"nczBJB6]L5:K(WY7*p8U\"><field name=\"NUM\">2</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"Fgm/=q[Zx)!WzGv/A(?.\"><field name=\"NUM\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"$_TdXplz]{@:k0|.r~#?\"><field name=\"VARIABLE\" id=\"|4MC6*$J`=t#,$nGETz)\" variabletype=\"\">r</field><comment id=\"):Tw5Yzo97[EEI=zhsmi\" pinned=\"true\" h=\"200\" w=\"200\" x=\"799\" y=\"496\" minimized=\"false\">Setzen der Variablen</comment><value name=\"VALUE\"><shadow type=\"text\" id=\"yI)@GC,jCOY[fE)kVu[a\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"!d:gh;`xZPan|1X}Pw4(\"><field name=\"VARIABLE\" id=\"w$zB)V9NH8Y4--#rgGKI\" variabletype=\"\">g</field><value name=\"VALUE\"><shadow type=\"text\" id=\"7qCdBYn,iWBtGEBS-^bs\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"data_setvariableto\" id=\"n59`$~|.[aJ7KYNPlUyz\"><field name=\"VARIABLE\" id=\"7g%dUU0JwY4b[gvHVk{K\" variabletype=\"\">b</field><value name=\"VALUE\"><shadow type=\"text\" id=\"4,?/?9nLrZ[;10/e+CBx\"><field name=\"TEXT\">0</field></shadow></value><next><block type=\"control_repeat\" id=\":yu;Aj-I4W}b!VqM(IL?\"><comment id=\"U$k+anC3i!~7E[?9@RS|\" pinned=\"true\" h=\"200\" w=\"200\" x=\"800\" y=\"770.6666666666665\" minimized=\"false\">Rot-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\"%@/,4j#1z^-.~o$L-gMQ\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"pwm_duty_255\" id=\"Uwn/U!ro:m@(x;,Whz@J\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"z`96%BnYhyP:4T4UK2cB\"><field name=\"NUM\">0</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"C*9i#QH8D|BdNCl%zHq$\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"}G45%NjbIGr3}1[@WLP0\"><field name=\"VARIABLE\" id=\"|4MC6*$J`=t#,$nGETz)\" variabletype=\"\">r</field></block></value><next><block type=\"data_changevariableby\" id=\"$kJJE)Q]`qoGmyZ~M5gy\"><field name=\"VARIABLE\" id=\"|4MC6*$J`=t#,$nGETz)\" variabletype=\"\">r</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\")9n{P;EuhN^^bs^T1tDw\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"9|2k`f(4K`,h_Q;cRYTd\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"E)Gq@~oPbGjF?y/q)ncC\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement><next><block type=\"control_repeat\" id=\"T%H3;=eKJtAVkqPNiDfs\"><comment id=\"er,JrL{o.I`5.qs/(]Qj\" pinned=\"true\" h=\"200\" w=\"200\" x=\"789\" y=\"994.6666666666667\" minimized=\"false\">Grün-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\"giM[l%.n-rvPH.+swpS8\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"pwm_duty_255\" id=\"q%`ZIOA`PVmM3,,1AIP=\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"(H}w#eRP+1*R+A6c4E}E\"><field name=\"NUM\">1</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"y4V1_nDmHlSve]/tGr9~\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"#7k_k^n:Y!ru-MtU7^j0\"><field name=\"VARIABLE\" id=\"w$zB)V9NH8Y4--#rgGKI\" variabletype=\"\">g</field></block></value><next><block type=\"data_changevariableby\" id=\"7qlqz.CfFcoglAwYq*!G\"><field name=\"VARIABLE\" id=\"w$zB)V9NH8Y4--#rgGKI\" variabletype=\"\">g</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\"c9O?,tQH=Ug^jsamM$=o\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"k|HlWphNbR(wMCSDbB.B\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"OaD!lhT5)8tRoYmL{S#B\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement><next><block type=\"control_repeat\" id=\"#a?^1goPLq2uCWbS`WwP\"><comment id=\"Fhj=cXDOM^/(1$D!o;fz\" pinned=\"true\" h=\"200\" w=\"200\" x=\"799\" y=\"1213.3333333333333\" minimized=\"false\">Blau-Schleife</comment><value name=\"TIMES\"><shadow type=\"math_whole_number\" id=\"Fal(q`yRZoEF/Smd?H34\"><field name=\"NUM\">255</field></shadow></value><statement name=\"SUBSTACK\"><block type=\"pwm_duty_255\" id=\"1G6rA6@i`$!XKV#tgy$j\"><value name=\"PIN\"><shadow type=\"math_number\" id=\"^/DTHab#a=U;6;UN+3CB\"><field name=\"NUM\">2</field></shadow></value><value name=\"DUTY\"><shadow type=\"math_number\" id=\"k0B)/798ljW+kBP}#?1G\"><field name=\"NUM\">255</field></shadow><block type=\"data_variable\" id=\"SQk|Am?X{3`*e)TjIF#(\"><field name=\"VARIABLE\" id=\"7g%dUU0JwY4b[gvHVk{K\" variabletype=\"\">b</field></block></value><next><block type=\"data_changevariableby\" id=\"e#9{HVN]IfdY/UfoSwM%\"><field name=\"VARIABLE\" id=\"7g%dUU0JwY4b[gvHVk{K\" variabletype=\"\">b</field><value name=\"VALUE\"><shadow type=\"math_number\" id=\"kCD-jR,zNquSn;vj4U@p\"><field name=\"NUM\">1</field></shadow></value><next><block type=\"control_wait\" id=\"~VEjouv,_FX#ts(=^GwB\"><value name=\"DURATION\"><shadow type=\"math_positive_number\" id=\"NKDz;m:x1wb{^J~A/:W!\"><field name=\"NUM\">0.01</field></shadow></value></block></next></block></next></block></statement></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></xml>",
 				"varTags": {
-					"r": "(}|P`33%1NOiveIj66y9",
-					"g": "?Ap~Lu}C)gM1`s!VT!KY",
-					"b": "m.)raX-J#,hCcD7(O8W("
+					"r": "|4MC6*$J`=t#,$nGETz)",
+					"g": "w$zB)V9NH8Y4--#rgGKI",
+					"b": "7g%dUU0JwY4b[gvHVk{K"
 				},
 				"blockTags": {
-					"firstresetblock": "7iMZeHa%[1%8YZjL9hY[",
-					"secondresetblock": "0Ca1s%^+$S5gL+7001`V",
-					"thirdresetblock": "uNcIV%NaP}YY%uX+Xf=(",
-					"setRvar": "9A;/l?=b]9*L+mic**k;",
-					"rLoop": "MQjJS[oMVNXDKgiWDNb{",
-					"rLoopBrightness": "GHQh:QtQpaUnrkubKoP)",
-					"rLoopChange": "xpuL+JZ;_!Js0ld^zU|w",
-					"rLoopSleep": "|snO1rxN%Am/LCaLM(8b",
-					"setGvar": "S6?Ozvy^J1s!KOJig[V:",
-					"gLoop": "{cj,aX*d.eZ~9mscQwvD",
-					"gLoopBrightness": "5d7$eBwA!r$F,=}Wph/*",
-					"gLoopChange": "-.}{J}aqH2iaNWZPHwe=",
-					"gLoopSleep": "|,:uI}+DKk%(H(Y/9ywc",
-					"setBvar": "~?eK.,w-Cu|?8fm,cbpQ",
-					"bLoop": "@*YAH@0-%8Rasab8bB^g",
-					"bLoopBrightness": "Oi)Kj62Mz)Cd23sHwR*D",
-					"bLoopChange": "9zAN(=gY!DO[Ap8VCm90",
-					"bLoopSleep": "mkjILpIL{Dq#atg@T`.P"
+					"firstresetblock":"b`IyldE8C-[uB9C(c7*:",
+					"secondresetblock":"j[]et1;RB$vZAe^uP@(}",
+					"thirdresetblock":"4C16B*)#9/*R:AisGi3H",
+					"setRvar":"$_TdXplz]{@:k0|.r~#?",
+					"rLoop":":yu;Aj-I4W}b!VqM(IL?",
+					"rLoopBrightness":"Uwn/U!ro:m@(x;,Whz@J",
+					"rLoopChange":"$kJJE)Q]`qoGmyZ~M5gy",
+					"rLoopSleep":"9|2k`f(4K`,h_Q;cRYTd",
+					"setGvar":"!d:gh;`xZPan|1X}Pw4(",
+					"gLoop":"T%H3;=eKJtAVkqPNiDfs",
+					"gLoopBrightness":"q%`ZIOA`PVmM3,,1AIP=",
+					"gLoopChange":"7qlqz.CfFcoglAwYq*!G",
+					"gLoopSleep":"k|HlWphNbR(wMCSDbB.B",
+					"setBvar":"n59`$~|.[aJ7KYNPlUyz",
+					"bLoop":"#a?^1goPLq2uCWbS`WwP",
+					"bLoopBrightness":"1G6rA6@i`$!XKV#tgy$j",
+					"bLoopChange":"e#9{HVN]IfdY/UfoSwM%",
+					"bLoopSleep":"~VEjouv,_FX#ts(=^GwB"
 				},
 				"wiring": "rgb-wiring.png",
 				"instructions": [
@@ -857,13 +874,6 @@
 						"block": "components_ultrasonic",
 						"parentBlock": "operator_join",
 						"blockTag": "ultrasonic"
-					},
-					{
-						"type": "changeblock",
-						"text": "Setze den Echo-PIN zu 1",
-						"targetBlockTag": "ultrasonic",
-						"name": "NUM",
-						"to": "1"
 					},
 					{
 						"type": "changeblock",
