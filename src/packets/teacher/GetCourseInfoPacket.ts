@@ -1,5 +1,5 @@
 import z from "zod";
-import { Connection, broadcastStudentsInCourse, broadcastTeachers } from "../../connection";
+import { Connection } from "../../connection";
 import Course from "../../model/course";
 import { courseLeaderboardJSON } from "../../utils";
 import { WebSocket } from "ws";

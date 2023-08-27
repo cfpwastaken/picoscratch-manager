@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { BelongsTo, Column, HasMany, HasOne, Model, AllowNull, PrimaryKey, Table, ForeignKey } from "sequelize-typescript";
+import { BelongsTo, Column, Model, AllowNull, PrimaryKey, Table, ForeignKey } from "sequelize-typescript";
 import Course from "./course.js";
 
 @Table({
@@ -20,9 +20,9 @@ export default class CodeGroup extends Model {
 	declare uuid: string;
 
   @ForeignKey(() => Course)
-  declare courseUuid: string;
+	declare courseUuid: string;
 
 	@BelongsTo(() => Course)
-	declare course: Course;
+  declare course: Course;
 
 }

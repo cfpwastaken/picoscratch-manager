@@ -31,5 +31,5 @@ export async function handleDeleteTeacherPacket(packet: InDeleteTeacherPacket, c
 		success: true,
 		wasUUID: packet.uuid
 	}));
-	broadcastAdmins(con.school, { type: "deleteTeacher", wasUUID: packet.uuid }, con.cid)
+	broadcastAdmins(con.school, { type: "deleteTeacher", wasUUID: packet.uuid }, con.cid);
 }

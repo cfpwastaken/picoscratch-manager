@@ -1,17 +1,13 @@
 import z from "zod";
-import { Connection, broadcastTeachers, resendLeaderboard } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { Connection } from "../../connection";
 import { WebSocket } from "ws";
-import Student from "../../model/student";
-import sequelize from "sequelize";
-import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils";
+import { capitalizeWords, studentLevelpath, studentSections } from "../../utils";
 import { demoTasks, tasks } from "../../main";
 
 export const InGetSectionPacket = z.object({
 	type: z.literal("getSection"),
 	section: z.number()
-})
+});
 
 export type InGetSectionPacket = z.infer<typeof InGetSectionPacket>;
 

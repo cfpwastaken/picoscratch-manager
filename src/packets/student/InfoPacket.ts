@@ -1,12 +1,7 @@
 import z from "zod";
-import { Connection, broadcastTeachers, resendLeaderboard } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { Connection } from "../../connection";
 import { WebSocket } from "ws";
-import Student from "../../model/student";
-import sequelize from "sequelize";
-import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { tasks } from "../../main";
 
 export const InInfoPacket = z.object({
 	type: z.literal("info"),

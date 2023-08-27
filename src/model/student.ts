@@ -88,6 +88,6 @@ export default class Student extends Model {
 	declare courseUuid: string;
 
 	@BelongsTo(() => Course)
-	declare course: Course;
+  declare course: Course;
 
 }

@@ -1,13 +1,11 @@
 import z from "zod";
-import { Connection, broadcastStudentsInCourse, broadcastTeachers, sendVerifications } from "../../connection";
-import Course from "../../model/course";
-import { courseLeaderboardJSON } from "../../utils";
+import { Connection, sendVerifications } from "../../connection";
 import { WebSocket } from "ws";
 
 export const InGetVerificationsPacket = z.object({
 	type: z.literal("getVerifications"),
 	course: z.string()
-})
+});
 
 export type InGetVerificationsPacket = z.infer<typeof InGetVerificationsPacket>;
 

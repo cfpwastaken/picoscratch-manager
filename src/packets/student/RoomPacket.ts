@@ -1,6 +1,5 @@
 import z from "zod";
-import { Connection, broadcastTeachers } from "../../connection";
-import Course from "../../model/course";
+import { Connection } from "../../connection";
 import Room from "../../model/room";
 import { WebSocket } from "ws";
 

@@ -1,5 +1,5 @@
 import z from "zod";
-import { Connection, broadcastStudentsInCourse, broadcastTeachers } from "../../connection";
+import { Connection, broadcastTeachers } from "../../connection";
 import Course from "../../model/course";
 import { WebSocket } from "ws";
 
@@ -7,7 +7,7 @@ export const InAllowRegisterPacket = z.object({
 	type: z.literal("allowRegister"),
 	course: z.string(),
 	allow: z.boolean()
-})
+});
 
 export type InAllowRegisterPacket = z.infer<typeof InAllowRegisterPacket>;
 

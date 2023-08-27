@@ -7,7 +7,7 @@ export const InRenameCoursePacket = z.object({
 	type: z.literal("renameCourse"),
 	uuid: z.string(),
 	name: z.string()
-})
+});
 
 export type InRenameCoursePacket = z.infer<typeof InRenameCoursePacket>;
 

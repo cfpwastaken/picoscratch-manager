@@ -1,17 +1,16 @@
 import { z } from "zod";
-import School from "../model/school.js";
 
 export const InGenericHiPacket = z.object({
 	type: z.literal("hi"),
 	schoolCode: z.string(),
 	clientType: z.enum(["teacher", "student"]),
-})
+});
 
 export const InTeacherHiPacket = InGenericHiPacket.extend({
 	clientType: z.literal("teacher"),
 	username: z.string(),
 	password: z.string(),
-})
+});
 
 export const InStudentHiPacket = InGenericHiPacket.extend({
 	clientType: z.literal("student"),
@@ -70,13 +69,13 @@ export const InChangeTeacherPasswordPacket = z.object({
 	type: z.literal("changeTeacherPassword"),
 	uuid: z.string(),
 	password: z.string()
-})
+});
 
 export const InRenameCoursePacket = z.object({
 	type: z.literal("renameCourse"),
 	uuid: z.string(),
 	name: z.string()
-})
+});
 
 export const InAdminPackets = z.union([
 	InAddTeacherPacket,
@@ -133,30 +132,30 @@ export const InSetLevelPacket = z.object({
 export const InGetVerificationsPacket = z.object({
 	type: z.literal("getVerifications"),
 	course: z.string()
-})
+});
 
 export const InVerifyPacket = z.object({
 	type: z.literal("verify"),
 	uuid: z.string(),
 	course: z.string()
-})
+});
 
 export const InDismissPacket = z.object({
 	type: z.literal("dismiss"),
 	uuid: z.string(),
 	course: z.string()
-})
+});
 
 export const InChangePasswordPacket = z.object({
 	type: z.literal("changePassword"),
 	password: z.string()
-})
+});
 
 export const InAllowRegisterPacket = z.object({
 	type: z.literal("allowRegister"),
 	course: z.string(),
 	allow: z.boolean()
-})
+});
 
 export const InTeacherPackets = z.union([
 	InSetActiveCoursePacket,
@@ -200,50 +199,50 @@ export const InDonePacket = z.object({
 	answeredqs: z.number().optional(),
 	correctqs: z.number().optional(),
 	section: z.number()
-})
+});
 
 export const InIdleStateChangePacket = z.object({
 	type: z.literal("idleStateChange"),
 	idle: z.boolean()
-})
+});
 
 export const InGetSectionPacket = z.object({
 	type: z.literal("getSection"),
 	section: z.number()
-})
+});
 
 export const InStartGroupPacket = z.object({
 	type: z.literal("startGroup")
-})
+});
 
 export const GroupCode = z.string().min(6).max(6).regex(/^[A-Z0-9]+$/);
 
 export const InJoinGroupPacket = z.object({
 	type: z.literal("joinGroup"),
 	group: GroupCode
-})
+});
 
 export const InGroupCodePacket = z.object({
 	type: z.literal("groupCode"),
 	group: GroupCode,
 	code: z.string()
-})
+});
 
 export const InLeaveGroupPacket = z.object({
 	type: z.literal("leaveGroup"),
 	group: GroupCode
-})
+});
 
 export const InSyncGroupPacket = z.object({
 	type: z.literal("syncGroup"),
 	group: GroupCode
-})
+});
 
 export const InGroupActionPacket = z.object({
 	type: z.literal("groupAction"),
 	group: z.string(),
 	action: z.any()
-})
+});
 
 export const InStudentPackets = z.union([
 	InRoomPacket,

@@ -1,5 +1,5 @@
 import { compare } from "bcrypt";
-import { loggedIn, tasks } from "./main.js";
+import { loggedIn } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
@@ -28,7 +28,7 @@ export function studentSections(student: Student, tasks: Tasks) {
 				name: section.name,
 				desc: section.desc,
 				img: section.img
-			}
+			};
 		}).slice(0, student.section + 1),
 		total: tasks.length
 	};
@@ -39,7 +39,7 @@ export function studentLevelpath(student: Student, tasks: Tasks, section: number
 		return {
 			name: task.name,
 			desc: task.desc
-		}
+		};
 	}).filter((_, index) => {
 		if(student.section != section) return true;
 		if(index < (student.level + 1)) return true;
@@ -49,13 +49,13 @@ export function studentLevelpath(student: Student, tasks: Tasks, section: number
 }
 
 export function isWhatPercentOf(numA: number, numB: number) {
-  return (numA / numB) * 100;
+	return (numA / numB) * 100;
 }
 
 export function capitalizeWords(arr: string[]) {
-  return arr.map(element => {
-    return element.charAt(0).toUpperCase() + element.slice(1).toLowerCase();
-  });
+	return arr.map(element => {
+		return element.charAt(0).toUpperCase() + element.slice(1).toLowerCase();
+	});
 }
 
 export async function courseLeaderboardJSON(course: Course) {
@@ -75,7 +75,7 @@ export async function courseLeaderboardJSON(course: Course) {
 			status: loggedIn.find(l => l.uuid == s.uuid) ? (loggedIn.find(l => {
 				return l.uuid ? l.uuid == s.uuid : false;
 			})?.idle ? "idle" : "online") : "offline"
-		}
+		};
 	});
 	leaderboard.sort((a, b) => b.xp - a.xp);
 	return leaderboard;

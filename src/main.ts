@@ -22,7 +22,7 @@ export const sql = new Sequelize(process.env.MYSQL_DB || "picoscratch", process.
 	host: process.env.MYSQL_HOST || "localhost",
 	dialect: "mariadb",
 	models: [School, Teacher, Course, Student, Room, Support, CodeGroup]
-})
+});
 
 const rawTasks = JSON.parse(await readFile("tasks.json", "utf8"));
 
@@ -36,11 +36,11 @@ process.on("uncaughtException", (err) => {
 	console.error(err);
 	errored = true;
 	console.log("ERRORED");
-})
+});
 
 async function loadModels() {
 	console.log("Syncing models...");
-	if(process.argv.includes("sync")) await sql.sync({ alter: true })
+	if(process.argv.includes("sync")) await sql.sync({ alter: true });
 }
 
 const app = express();
@@ -55,13 +55,13 @@ app.use((req, res, next) => {
 if(process.argv.includes("maintenance")) {
 	app.use((req, res) => {
 		return res.status(503).sendFile("web/maintenance.html", { root: __dirname });
-	})
+	});
 }
 
 app.use((req, res, next) => {
 	if(errored) return res.status(500).sendFile("web/error.html", { root: __dirname });
 	next();
-})
+});
 
 app.use(express.static("src/web"));
 app.use(bodyParser.json());
@@ -78,13 +78,13 @@ app.get("/api/schoolcode/:code", async (req, res) => {
 	console.log(s);
 	if(!s) return res.status(404).send({error: "School not found"});
 	res.send({name: s.name, uuid: s.uuid, lang: s.lang});
-})
+});
 
 app.post("/api/support", async (req, res) => {
 	if(!req.body.data) return res.status(400).send({error: "Missing data"});
 	const support = await Support.create({ data: JSON.stringify(req.body.data), code: randomCode() });
 	res.send({id: support.id});
-})
+});
 
 function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -102,14 +102,14 @@ app.post("/api/makeSchool", async (req, res) => {
 		fd.append("response", token);
 		fd.append("remoteip", ip);
 
-		let cf_res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+		const cf_res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method: "POST",
 			body: fd
 		}).then(res => res.json());
 		// zod verify
 		const cf_response = z.object({
 			success: z.boolean()
-		})
+		});
 		if(!cf_response.safeParse(cf_res)) return void res.status(400).send({error: "Invalid captcha"});
 		if(!(cf_res as {success: boolean}).success) return void res.status(400).send({error: "Invalid captcha"});
 	}
@@ -118,11 +118,11 @@ app.post("/api/makeSchool", async (req, res) => {
 	await sleep(5000);
 	await School.create({ name: req.body.schoolname, adminPassword: req.body.password, lang: req.body.lang, code, isDemo: true });
 	res.send({ code });
-})
+});
 
 app.get("*", (req, res) => {
 	res.sendFile("web/404.html", { root: __dirname });
-})
+});
 
 export const loggedIn: Connection[] = [];
 
@@ -136,8 +136,8 @@ setInterval(() => {
 
 wss.addListener("connection", (ws) => {
 	loggedIn.push(new Connection(ws));
-})
+});
 
 server.listen(8080, () => {
 	console.log("Server listening on port 8080");
-})
+});

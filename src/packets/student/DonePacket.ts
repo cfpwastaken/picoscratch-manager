@@ -1,10 +1,6 @@
 import z from "zod";
-import { Connection, TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastTeachers, broadcastVerifications, resendLeaderboard } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { Connection, TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastVerifications, resendLeaderboard } from "../../connection";
 import { WebSocket } from "ws";
-import Student from "../../model/student";
-import sequelize from "sequelize";
 import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils";
 import { demoTasks, tasks } from "../../main";
 
@@ -14,7 +10,7 @@ export const InDonePacket = z.object({
 	answeredqs: z.number().optional(),
 	correctqs: z.number().optional(),
 	section: z.number()
-})
+});
 
 export type InDonePacket = z.infer<typeof InDonePacket>;
 

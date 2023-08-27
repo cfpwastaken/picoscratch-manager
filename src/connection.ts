@@ -1,14 +1,12 @@
 import { v4 as uuid } from "uuid";
-import { lastPing, loggedIn, tasks, demoTasks } from "./main.js";
+import { loggedIn } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
-import Student from "./model/student.js";
 import Teacher from "./model/teacher.js";
-import { authenticate, hasJsonStructure, validClientTypes, capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "./utils.js";
+import { hasJsonStructure, courseLeaderboardJSON } from "./utils.js";
 import { WebSocket } from "ws";
-import { InPacket, InTeacherHiPacket } from "./types/Packet.js";
-import CodeGroup from "./model/codegroups.js";
+import { InPacket } from "./types/Packet.js";
 
 import { handleHiPacket } from "./packets/HiPacket.js";
 import { handlePongPacket } from "./packets/PongPacket.js";
@@ -93,7 +91,7 @@ export function getVerifications(courseUUID: string) {
 		return {
 			uuid: logged.uuid,
 			name: logged.name
-		}
+		};
 	}) };
 }
 
@@ -104,7 +102,7 @@ export function broadcastVerifications(school: School, courseUUID: string, excep
 const globalPackets = {
 	hi: handleHiPacket,
 	pong: handlePongPacket
-}
+};
 
 const adminPackets = {
 	// Course
@@ -118,7 +116,7 @@ const adminPackets = {
 	addTeacher: handleAddTeacherPacket,
 	deleteTeacher: handleDeleteTeacherPacket,
 	changeTeacherPassword: handleChangeTeacherPasswordPacket
-}
+};
 
 const teacherPackets = {
 	// Course
@@ -136,7 +134,7 @@ const teacherPackets = {
 	verify: handleVerifyPacket,
 	// Other
 	changePassword: handleChangePasswordPacket
-}
+};
 
 const studentPackets = {
 	room: handleRoomPacket,
@@ -146,7 +144,7 @@ const studentPackets = {
 	info: handleInfoPacket,
 	task: handleTaskPacket,
 	done: handleDonePacket
-}
+};
 
 export class Connection {
 	clientType = "";
@@ -155,7 +153,7 @@ export class Connection {
 	room!: Room;
 	name!: string;
 	cid = uuid();
-	ws: WebSocket
+	ws: WebSocket;
 	uuid!: string;
 	idle!: boolean;
 	thisTeacher!: Teacher;
@@ -164,14 +162,14 @@ export class Connection {
 		this.ws = ws;
 		this.ws.addEventListener("message", async (msg) => {
 			if(!hasJsonStructure(msg.data.toString())) {
-				this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}))
+				this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}));
 				this.ws.close();
 				return;
 			}
 			const rawpacket = JSON.parse(msg.data.toString());
 			const zodVerify = InPacket.safeParse(rawpacket);
 			if(!zodVerify.success) {
-				this.ws.send(JSON.stringify({type: "conversationError", error: "I don't know of such a packet!", zoderror: zodVerify.error.issues}))
+				this.ws.send(JSON.stringify({type: "conversationError", error: "I don't know of such a packet!", zoderror: zodVerify.error.issues}));
 				this.ws.close();
 				return;
 			}
@@ -185,7 +183,7 @@ export class Connection {
 			}
 
 			if(this.clientType == "") {
-				this.ws.send(JSON.stringify({type: "conversationError", error: "You aren't authenticated yet"}))
+				this.ws.send(JSON.stringify({type: "conversationError", error: "You aren't authenticated yet"}));
 				this.ws.close();
 				return;
 			}
@@ -214,7 +212,7 @@ export class Connection {
 			}
 
 			// If we get here, the packet is not handled
-			this.ws.send(JSON.stringify({type: "conversationError", error: "Unable to handle packet"}))
+			this.ws.send(JSON.stringify({type: "conversationError", error: "Unable to handle packet"}));
 		});
 		this.ws.on("close", async () => {
 			loggedIn.splice(loggedIn.indexOf(this), 1);

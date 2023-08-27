@@ -12,13 +12,13 @@ export const InGenericHiPacket = z.object({
 	type: z.literal("hi"),
 	schoolCode: z.string(),
 	clientType: z.enum(["teacher", "student"]),
-})
+});
 
 export const InTeacherHiPacket = InGenericHiPacket.extend({
 	clientType: z.literal("teacher"),
 	username: z.string(),
 	password: z.string(),
-})
+});
 
 export const InStudentHiPacket = InGenericHiPacket.extend({
 	clientType: z.literal("student"),
@@ -39,7 +39,7 @@ export async function handleHiPacket(packet: InHiPacket, con: Connection, ws: We
 			type: "hi",
 			error: "Invalid school code",
 			success: false
-		}))
+		}));
 		return;
 	}
 	con.school = s;

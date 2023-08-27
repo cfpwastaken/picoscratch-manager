@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Connection, broadcastAdmins } from "../../../connection";
+import { Connection } from "../../../connection";
 import Teacher from "../../../model/teacher";
 import { WebSocket } from "ws";
 
@@ -7,7 +7,7 @@ export const InChangeTeacherPasswordPacket = z.object({
 	type: z.literal("changeTeacherPassword"),
 	uuid: z.string(),
 	password: z.string()
-})
+});
 
 export type InChangeTeacherPasswordPacket = z.infer<typeof InChangeTeacherPasswordPacket>;
 

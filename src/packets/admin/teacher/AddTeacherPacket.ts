@@ -30,5 +30,5 @@ export async function handleAddTeacherPacket(packet: InAddTeacherPacket, con: Co
 		success: true,
 		teacher
 	}));
-	broadcastAdmins(con.school, { type: "addTeacher", teacher }, con.cid)
+	broadcastAdmins(con.school, { type: "addTeacher", teacher }, con.cid);
 }

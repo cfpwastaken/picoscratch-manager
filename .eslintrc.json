@@ -8,6 +8,7 @@
 		"plugin:@typescript-eslint/recommended",
 		"plugin:import/typescript"
 	],
+	"ignorePatterns": ["*.js"],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": "latest",
@@ -15,7 +16,8 @@
 	},
 	"plugins": [
 		"@typescript-eslint",
-		"import"
+		"import",
+		"unused-imports"
 	],
 	"rules": {
 		"indent": [
@@ -35,7 +37,10 @@
 			"always"
 		],
 		"import/export": "error",
-		"import/no-duplicates": "error"
+		"import/no-duplicates": "error",
+    "@typescript-eslint/no-unused-vars": "off",
+		"unused-imports/no-unused-imports": "error",
+		"@typescript-eslint/ban-ts-comment": "off"
 	},
 	"settings": {
 		"import/resolver": {

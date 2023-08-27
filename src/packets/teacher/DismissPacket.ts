@@ -1,7 +1,5 @@
 import z from "zod";
-import { Connection, awaitingVerification, broadcastStudentsInCourse, broadcastTeachers, broadcastVerifications, sendVerifications } from "../../connection";
-import Course from "../../model/course";
-import { courseLeaderboardJSON } from "../../utils";
+import { Connection, awaitingVerification, broadcastVerifications } from "../../connection";
 import { WebSocket } from "ws";
 import { loggedIn } from "../../main";
 
@@ -9,7 +7,7 @@ export const InDismissPacket = z.object({
 	type: z.literal("dismiss"),
 	uuid: z.string(),
 	course: z.string()
-})
+});
 
 export type InDismissPacket = z.infer<typeof InDismissPacket>;
 

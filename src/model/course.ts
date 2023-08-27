@@ -38,10 +38,10 @@ export default class Course extends Model {
 	declare allowRegister: boolean;
 
   @ForeignKey(() => School)
-  declare schoolUuid: string;
+	declare schoolUuid: string;
 
 	@BelongsTo(() => School)
-	declare school: School;
+  declare school: School;
 
 	@HasOne(() => Room)
 	declare room: Room;

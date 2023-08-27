@@ -25,15 +25,15 @@ export default class Teacher extends Model {
 	@Column({
 		type: DataTypes.STRING,
 		set(value) {
-			this.setDataValue("password", hashSync(String(value), 10))
+			this.setDataValue("password", hashSync(String(value), 10));
 		}
 	})
 	declare password: string;
 
   @ForeignKey(() => School)
-  declare schoolUuid: string;
+	declare schoolUuid: string;
 
 	@BelongsTo(() => School)
-	declare school: School;
+  declare school: School;
 
 }

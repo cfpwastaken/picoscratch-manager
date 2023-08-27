@@ -27,7 +27,7 @@ export default class School extends Model {
 	@Column({
 		type: DataTypes.STRING,
 		set(value) {
-			this.setDataValue("adminPassword", hashSync(String(value), 10))
+			this.setDataValue("adminPassword", hashSync(String(value), 10));
 		}
 	})
 	declare adminPassword: string;

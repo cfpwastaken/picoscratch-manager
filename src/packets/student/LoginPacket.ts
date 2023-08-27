@@ -1,10 +1,7 @@
 import z from "zod";
-import { Connection, broadcastTeachers, resendLeaderboard } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { Connection, resendLeaderboard } from "../../connection";
 import { WebSocket } from "ws";
 import Student from "../../model/student";
-import sequelize from "sequelize";
 import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils";
 import { demoTasks, tasks } from "../../main";
 
@@ -48,7 +45,7 @@ export async function handleLoginPacket(packet: InLoginPacket, con: Connection, 
 			return;
 		}
 	}
-	let student = stud as Student;
+	const student = stud as Student;
 	console.log("Student", student.name, "logged in", JSON.stringify(student.toJSON(), null, 2));
 	con.name = student.name;
 	con.uuid = student.uuid;
