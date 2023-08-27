@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 });
 
 if(process.argv.includes("maintenance")) {
-	app.use((req, res, next) => {
+	app.use((req, res) => {
 		return res.status(503).sendFile("web/maintenance.html", { root: __dirname });
 	})
 }

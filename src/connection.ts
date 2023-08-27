@@ -10,12 +10,41 @@ import { WebSocket } from "ws";
 import { InPacket, InTeacherHiPacket } from "./types/Packet.js";
 import CodeGroup from "./model/codegroups.js";
 
-const TASK_VERIFICATION_NEEDED = true;
-const awaitingVerification: { [key: string]: { uuid: string, packet: object, verified: boolean }[] } = {};
-const peopleInGroup: { [key: string]: Connection[] } = {};
-const peopleInGroupRequestingSync: { [key: string]: Connection[] } = {};
+import { handleHiPacket } from "./packets/HiPacket.js";
+import { handlePongPacket } from "./packets/PongPacket.js";
+import { handleAddCoursePacket } from "./packets/admin/course/AddCoursePacket.js";
+import { handleDeleteCoursePacket } from "./packets/admin/course/DeleteCoursePacket.js";
+import { handleRenameCoursePacket } from "./packets/admin/course/RenameCoursePacket.js";
+import { handleAddRoomPacket } from "./packets/admin/room/AddRoomPacket.js";
+import { handleDeleteRoomPacket } from "./packets/admin/room/DeleteRoomPacket.js";
+import { handleAddTeacherPacket } from "./packets/admin/teacher/AddTeacherPacket.js";
+import { handleChangeTeacherPasswordPacket } from "./packets/admin/teacher/ChangeTeacherPassword.js";
+import { handleDeleteTeacherPacket } from "./packets/admin/teacher/DeleteTeacherPacket.js";
+import { handleAllowRegisterPacket } from "./packets/teacher/AllowRegisterPacket.js";
+import { handleChangePasswordPacket } from "./packets/teacher/ChangePasswordPacket.js";
+import { handleDeletePacket } from "./packets/teacher/DeletePacket.js";
+import { handleDismissPacket } from "./packets/teacher/DismissPacket.js";
+import { handleGetCourseInfoPacket } from "./packets/teacher/GetCourseInfoPacket.js";
+import { handleGetVerificationsPacket } from "./packets/teacher/GetVerificationsPacket.js";
+import { handleKickPacket } from "./packets/teacher/KickPacket.js";
+import { handleSetActiveCoursePacket } from "./packets/teacher/SetActiveCoursePacket.js";
+import { handleStartCoursePacket } from "./packets/teacher/StartCoursePacket.js";
+import { handleStopCoursePacket } from "./packets/teacher/StopCoursePacket.js";
+import { handleVerifyPacket } from "./packets/teacher/VerifyPacket.js";
+import { handleDonePacket } from "./packets/student/DonePacket.js";
+import { handleGetSectionPacket } from "./packets/student/GetSectionPacket.js";
+import { handleIdleStateChangePacket } from "./packets/student/IdleStateChangePacket.js";
+import { handleInfoPacket } from "./packets/student/InfoPacket.js";
+import { handleLoginPacket } from "./packets/student/LoginPacket.js";
+import { handleRoomPacket } from "./packets/student/RoomPacket.js";
+import { handleTaskPacket } from "./packets/student/TaskPacket.js";
 
-function broadcastAdmins(school: School, packet: object, exceptCID?: string) {
+export const TASK_VERIFICATION_NEEDED = true;
+export const awaitingVerification: { [key: string]: { uuid: string, packet: object, verified: boolean }[] } = {};
+export const peopleInGroup: { [key: string]: Connection[] } = {};
+export const peopleInGroupRequestingSync: { [key: string]: Connection[] } = {};
+
+export function broadcastAdmins(school: School, packet: object, exceptCID?: string) {
 	for(const connection of loggedIn) {
 		if(exceptCID && connection.cid == exceptCID) continue;
 		if(connection.isAdmin && connection.school.uuid == school.uuid) {
@@ -24,7 +53,7 @@ function broadcastAdmins(school: School, packet: object, exceptCID?: string) {
 	}
 }
 
-function broadcastTeachers(school: School, packet: object, exceptCID?: string) {
+export function broadcastTeachers(school: School, packet: object, exceptCID?: string) {
 	for(const connection of loggedIn) {
 		if(connection.clientType != "teacher") continue;
 		if(exceptCID && connection.cid == exceptCID) continue;
@@ -33,7 +62,7 @@ function broadcastTeachers(school: School, packet: object, exceptCID?: string) {
 	}
 }
 
-async function broadcastStudentsInCourse(course: Course, packet: object) {
+export async function broadcastStudentsInCourse(course: Course, packet: object) {
 	for(const connection of loggedIn) {
 		if(connection.clientType != "student") continue;
 		if(!connection.room) continue;
@@ -44,17 +73,17 @@ async function broadcastStudentsInCourse(course: Course, packet: object) {
 	}
 }
 
-async function resendLeaderboard(school: School, course: Course) {
+export async function resendLeaderboard(school: School, course: Course) {
 	const leaderboard = await courseLeaderboardJSON(course);
 	await broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard});
 	broadcastTeachers(school, {type: "leaderboard", course, leaderboard});
 }
 
-function sendVerifications(courseUUID: string, ws: WebSocket) {
+export function sendVerifications(courseUUID: string, ws: WebSocket) {
 	ws.send(JSON.stringify(getVerifications(courseUUID)));
 }
 
-function getVerifications(courseUUID: string) {
+export function getVerifications(courseUUID: string) {
 	if(!awaitingVerification[courseUUID]) {
 		return {type: "verifications", verifications: []};
 	}
@@ -68,8 +97,55 @@ function getVerifications(courseUUID: string) {
 	}) };
 }
 
-function broadcastVerifications(school: School, courseUUID: string, exceptCID?: string) {
+export function broadcastVerifications(school: School, courseUUID: string, exceptCID?: string) {
 	broadcastTeachers(school, getVerifications(courseUUID), exceptCID);
+}
+
+const globalPackets = {
+	hi: handleHiPacket,
+	pong: handlePongPacket
+}
+
+const adminPackets = {
+	// Course
+	addCourse: handleAddCoursePacket,
+	deleteCourse: handleDeleteCoursePacket,
+	renameCourse: handleRenameCoursePacket,
+	// Room
+	addRoom: handleAddRoomPacket,
+	deleteRoom: handleDeleteRoomPacket,
+	// Teacher
+	addTeacher: handleAddTeacherPacket,
+	deleteTeacher: handleDeleteTeacherPacket,
+	changeTeacherPassword: handleChangeTeacherPasswordPacket
+}
+
+const teacherPackets = {
+	// Course
+	allowRegister: handleAllowRegisterPacket,
+	getCourseInfo: handleGetCourseInfoPacket,
+	getVerifications: handleGetVerificationsPacket,
+	setActiveCourse: handleSetActiveCoursePacket,
+	startCourse: handleStartCoursePacket,
+	stopCourse: handleStopCoursePacket,
+	// Student-management
+	delete: handleDeletePacket,
+	kick: handleKickPacket,
+	// Verification-management
+	dismiss: handleDismissPacket,
+	verify: handleVerifyPacket,
+	// Other
+	changePassword: handleChangePasswordPacket
+}
+
+const studentPackets = {
+	room: handleRoomPacket,
+	login: handleLoginPacket,
+	idleStateChange: handleIdleStateChangePacket,
+	getSection: handleGetSectionPacket,
+	info: handleInfoPacket,
+	task: handleTaskPacket,
+	done: handleDonePacket
 }
 
 export class Connection {
@@ -101,689 +177,44 @@ export class Connection {
 			}
 			const packet = zodVerify.data;
 			console.log("USER SENDS", JSON.stringify(packet));
-			if(packet.type == "hi") {
-				const s = await School.findOne({ where: { code: packet.schoolCode }, include: [Teacher, Course, Room] });
-				if(s == null) {
-					this.ws.send(JSON.stringify({type: "hi", success: false}));
-					return;
-				}
-				this.school = s;
-				if(!this.school) {
-					this.ws.send(JSON.stringify({type: "hi", success: false}));
-					return;
-				}
-				if(validClientTypes.indexOf(packet.clientType) != -1) {
-					this.clientType = packet.clientType;
-				} else {
-					this.ws.send(JSON.stringify({type: "conversationError", error: "Thats not a valid client type"}));
-					this.ws.close();
-					return;
-				}
-				if(this.clientType == "teacher") {
-					if(!InTeacherHiPacket.safeParse(packet).success) {
-						this.ws.send(JSON.stringify({type: "conversationError", error: "You are speaking nonsense to me"}))
-						this.ws.close();
-						return;
-					}
-					const pack = packet as InTeacherHiPacket;
-					// Authenticate teacher using authenticate function
-					const auth = await authenticate(this.school.uuid, pack.username, pack.password);
-					if(auth.error) {
-						this.ws.send(JSON.stringify({type: "hi", success: false}));
-						return;
-					}
-					this.isAdmin = auth.admin;
-
-					if(!(pack.username.toLowerCase() == "admin")) {
-						const ts = await s.$get("teachers");
-						const t = ts.find(t => t.name.toLowerCase() == pack.username.toLowerCase());
-						if(t) this.thisTeacher = t;
-					}
-
-					this.ws.send(JSON.stringify({type: "hi", success: true, school: this.school, lang: this.school.lang}));
-				} else if(this.clientType == "student") {
-					const rooms = await this.school.$get("rooms");
-					this.ws.send(JSON.stringify({type: "hi", success: true, schoolname: this.school.name, rooms, lang: this.school.lang}));
-				}
-				return;
-			} else if(packet.type == "pong") {
-				// Calculate ping time using the lastPing variable
-				const ping = Date.now() - lastPing;
-				// If thats too long, send a warning packet
-				if(ping > 1000) {
-					this.ws.send(JSON.stringify({type: "pingWarn", warning: "Your ping is too high. You might experience lag"}));
-				}
-				ws.send(JSON.stringify({type: "pingTime", ping}));
+			
+			if(packet.type in globalPackets) {
+				// @ts-ignore
+				globalPackets[packet.type](packet, this, this.ws);
 				return;
 			}
+
 			if(this.clientType == "") {
 				this.ws.send(JSON.stringify({type: "conversationError", error: "You aren't authenticated yet"}))
 				this.ws.close();
 				return;
 			}
-			if(this.clientType == "teacher" && this.isAdmin) {
-				if(packet.type == "addTeacher") {
-					if(!packet.username || !packet.password) {
-						this.ws.send(JSON.stringify({type: "addTeacher", success: false, error: "Missing name or password"}));
-						return;
-					}
-					if(this.school.isDemo) {
-						if((await this.school.$count("teachers")) >= 10) {
-							this.ws.send(JSON.stringify({type: "addTeacher", success: false, error: "Demo schools can only have up to 10 teachers"}));
-							return;
-						}
-					}
-					const t = await this.school.$create("teacher", {name: packet.username, password: packet.password});
-					this.ws.send(JSON.stringify({type: "addTeacher", success: true, teacher: t}));
-					broadcastAdmins(this.school, {type: "addTeacher", teacher: t}, this.cid);
-				} else if(packet.type == "deleteTeacher") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "deleteTeacher", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const t = await this.school.$get("teachers");
-					const teacher = t.find(t => t.uuid == packet.uuid);
-					if(!teacher) {
-						this.ws.send(JSON.stringify({type: "deleteTeacher", success: false, error: "Teacher not found"}));
-						return;
-					}
-					await teacher.destroy();
-					this.ws.send(JSON.stringify({type: "deleteTeacher", success: true, wasUUID: packet.uuid}));
-					broadcastAdmins(this.school, {type: "deleteTeacher", wasUUID: packet.uuid}, this.cid);
-				} else if(packet.type == "addCourse") {
-					if(!packet.name) {
-						this.ws.send(JSON.stringify({type: "addCourse", success: false, error: "Missing name"}));
-						return;
-					}
-					if(this.school.isDemo) {
-						if((await this.school.$count("courses")) >= 10) {
-							this.ws.send(JSON.stringify({type: "addCourse", success: false, error: "Demo schools can only have up to 10 courses"}));
-							return;
-						}
-					}
-					const c = await this.school.$create("course", {name: packet.name});
-					this.ws.send(JSON.stringify({type: "addCourse", success: true, course: c}));
-					broadcastAdmins(this.school, {type: "addCourse", course: c}, this.cid);
-				} else if(packet.type == "deleteCourse") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "deleteCourse", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.uuid);
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "deleteCourse", success: false, error: "Course not found"}));
-						return;
-					}
-					await course.destroy();
-					this.ws.send(JSON.stringify({type: "deleteCourse", success: true, wasUUID: packet.uuid}));
-					broadcastAdmins(this.school, {type: "deleteCourse", wasUUID: packet.uuid}, this.cid);
-				} else if(packet.type == "addRoom") {
-					if(!packet.name) {
-						this.ws.send(JSON.stringify({type: "addRoom", success: false, error: "Missing name"}));
-						return;
-					}
-					if(this.school.isDemo) {
-						if((await this.school.$count("rooms")) >= 10) {
-							this.ws.send(JSON.stringify({type: "addRoom", success: false, error: "Demo schools can only have up to 10 rooms"}));
-							return;
-						}
-					}
-					const r = await this.school.$create("room", {name: packet.name});
-					this.ws.send(JSON.stringify({type: "addRoom", success: true, room: r}));
-					broadcastAdmins(this.school, {type: "addRoom", room: r}, this.cid);
-				} else if(packet.type == "deleteRoom") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "deleteRoom", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const r = await this.school.$get("rooms");
-					const room = r.find(r => r.uuid == packet.uuid);
-					if(!room) {
-						this.ws.send(JSON.stringify({type: "deleteRoom", success: false, error: "Room not found"}));
-						return;
-					}
-					await room.destroy();
-					this.ws.send(JSON.stringify({type: "deleteRoom", success: true, wasUUID: packet.uuid}));
-					broadcastAdmins(this.school, {type: "deleteRoom", wasUUID: packet.uuid}, this.cid);
-				} else if(packet.type == "setLang") {
-					if(!packet.lang) {
-						this.ws.send(JSON.stringify({type: "setLang", success: false, error: "Missing lang"}));
-						return;
-					}
-					this.school.lang = packet.lang;
-					await this.school.save();
-					this.ws.send(JSON.stringify({type: "setLang", success: true, lang: this.school.lang}));
-					broadcastAdmins(this.school, {type: "setLang", lang: this.school.lang}, this.cid);
-				} else if(packet.type == "setChannel") {
-					if(!packet.channel) {
-						this.ws.send(JSON.stringify({type: "setChannel", success: false, error: "Missing channel"}));
-						return;
-					}
-					this.school.channel = packet.channel;
-					await this.school.save();
-					this.ws.send(JSON.stringify({type: "setChannel", success: true, channel: this.school.channel}));
-					broadcastAdmins(this.school, {type: "setChannel", channel: this.school.channel}, this.cid);
-				} else if(packet.type == "changeTeacherPassword") {
-					if(!packet.uuid || !packet.password) {
-						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Missing uuid or password"}));
-						return;
-					}
-					const t = await this.school.$get("teachers");
-					const teacher = t.find(t => t.uuid == packet.uuid);
-					if(!teacher) {
-						this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: false, error: "Teacher not found"}));
-						return;
-					}
-					teacher.password = packet.password;
-					await teacher.save();
-					this.ws.send(JSON.stringify({type: "changeTeacherPassword", success: true, uuid: teacher.uuid}));
-				} else if(packet.type == "renameCourse") {
-					if(!packet.uuid || !packet.name) {
-						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Missing uuid or name"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.uuid);
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "renameCourse", success: false, error: "Course not found"}));
-						return;
-					}
-					course.name = packet.name;
-					await course.save();
-					broadcastTeachers(this.school, {type: "renameCourse", uuid: course.uuid, name: course.name});
-				}
+
+			if(this.clientType == "teacher" && this.isAdmin && packet.type in adminPackets) {
+				// @ts-ignore
+				adminPackets[packet.type](packet, this, this.ws);
+				return;
 			}
-			if(this.clientType == "teacher") {
-				if(packet.type == "setActiveCourse") {
-					if(!packet.uuid || !packet.course) {
-						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Missing uuid or course"}));
-						return;
-					}
-					const r = await this.school.$get("rooms");
-					const room = r.find(r => r.uuid == packet.uuid) || null;
-					if(!room) {
-						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Room not found"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.course) || null;
-					if(!course && packet.course != "nocourse") {
-						this.ws.send(JSON.stringify({type: "setActiveCourse", success: false, error: "Course not found"}));
-						return;
-					}
-					await room.$set("course", course);
-					this.ws.send(JSON.stringify({type: "setActiveCourse", success: true, course: course}));
-					broadcastTeachers(this.school, {type: "setActiveCourse", uuid: packet.uuid, course: course}, this.cid);
-				} else if(packet.type == "startCourse") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "startCourse", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.uuid) || null;
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "startCourse", success: false, error: "Course not found"}));
-						return;
-					}
-					course.isRunning = true;
-					await course.save();
-					// for(const logged of loggedIn) {
-					// 	if(logged.clientType == "student") {
-					// 		if(!logged.room) continue;
-					// 		const c = await logged.room.getCourse();
-					// 		if(!c) continue;
-					// 		if(!c.uuid == c.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "startCourse"}));
-					// 	} else if(logged.clientType == "teacher") {
-					// 		if(logged.cid == this.cid) continue;
-					// 		if(logged.school.uuid != this.school.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "startCourse", course}));
-					// 	}
-					// }
-					await broadcastStudentsInCourse(course, {type: "startCourse"});
-					broadcastTeachers(this.school, {type: "startCourse", course}, this.cid);
-					this.ws.send(JSON.stringify({type: "startCourse", success: true, course}));
-				} else if(packet.type == "stopCourse") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "stopCourse", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.uuid) || null;
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "stopCourse", success: false, error: "Course not found"}));
-						return;
-					}
-					course.isRunning = false;
-					await course.save();
-					// for(const logged of loggedIn) {
-					// 	if(logged.clientType == "student") {
-					// 		if(!logged.room) continue;
-					// 		const c = await logged.room.getCourse();
-					// 		if(!c) continue;
-					// 		if(!c.uuid == c.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "stopCourse"}));
-					// 	} else if(logged.clientType == "teacher") {
-					// 		if(logged.cid == this.cid) continue;
-					// 		if(logged.school.uuid != this.school.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "stopCourse", course}));
-					// 	}
-					// }
-					await broadcastStudentsInCourse(course, {type: "stopCourse"});
-					broadcastTeachers(this.school, {type: "stopCourse", course}, this.cid);
-					this.ws.send(JSON.stringify({type: "stopCourse", success: true, course}));
-				} else if(packet.type == "getCourseInfo") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "getCourseInfo", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const c = await this.school.$get("courses");
-					const course = c.find(c => c.uuid == packet.uuid) || null;
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "getCourseInfo", success: false, error: "Course not found"}));
-						return;
-					}
-					this.ws.send(JSON.stringify({type: "getCourseInfo", success: true, leaderboard: await courseLeaderboardJSON(course)}));
-				} else if(packet.type == "kick") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "kick", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const student = await Student.findOne({where: {uuid: packet.uuid}});
-					if(!student) {
-						this.ws.send(JSON.stringify({type: "kick", success: false, error: "Student not found"}));
-						return;
-					}
-					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
-					if(logged) {
-						logged.ws.send(JSON.stringify({type: "kick"}));
-						logged.ws.close();
-					}
-				} else if(packet.type == "delete") {
-					if(!packet.uuid || !packet.courseUUID) {
-						this.ws.send(JSON.stringify({type: "delete", success: false, error: "Missing uuid or courseUUID"}));
-						return;
-					}
-					const course = await Course.findOne({where: {uuid: packet.courseUUID}});
-					if(!course) {
-						this.ws.send(JSON.stringify({type: "delete", success: false, error: "Course not found"}));
-						return;
-					}
-					const student = await Student.findOne({where: {uuid: packet.uuid}});
-					if(!student) {
-						this.ws.send(JSON.stringify({type: "delete", success: false, error: "Student not found"}));
-						return;
-					}
-					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
-					if(logged) {
-						logged.ws.send(JSON.stringify({type: "kick"}));
-						logged.ws.close();
-					}
-					await student.destroy();
-					// for(const logged of loggedIn) {
-					// 	if(logged.clientType == "student") {
-					// 		if(!logged.room) continue;
-					// 		if(!logged.room.courseUuid == course.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
-					// 	} else if(logged.clientType == "teacher") {
-					// 		if(logged.cid == this.cid) continue;
-					// 		if(logged.school.uuid != this.school.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
-					// 	}
-					// }
-					// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
-					// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
-					await resendLeaderboard(this.school, course);
-				} else if(packet.type == "setLevel") {
-					// if(!packet.uuid || !packet.courseUUID) {
-					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Missing uuid or courseUUID"}));
-					// 	return;
-					// }
-					// const course = await Course.findOne({where: {uuid: packet.courseUUID}});
-					// if(!course) {
-					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Course not found"}));
-					// 	return;
-					// }
-					// const student = await Student.findOne({where: {uuid: packet.uuid}});
-					// if(!student) {
-					// 	this.ws.send(JSON.stringify({type: "setLevel", success: false, error: "Student not found"}));
-					// 	return;
-					// }
-					// student.level = packet.level;
-					// await student.save();
-					// const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == student.uuid);
-					// if(logged) {
-					// 	logged.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks)}));
-					// }
-					// for(const logged of loggedIn) {
-					// 	if(logged.clientType == "student") {
-					// 		if(!logged.room) continue;
-					// 		if(!logged.room.courseUuid == course.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
-					// 	} else if(logged.clientType == "teacher") {
-					// 		// if(logged.cid == this.cid) continue;
-					// 		if(logged.school.uuid != this.school.uuid) continue;
-					// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)}));
-					// 	}
-					// }
-					// await resendLeaderboard(this.school, course);
-				} else if(packet.type == "getVerifications") {
-					sendVerifications(packet.course, ws);
-				} else if(packet.type == "verify") {
-					const verification = awaitingVerification[packet.course].find(v => v.uuid == packet.uuid);
-					if(!verification) return;
-					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == packet.uuid);
-					verification.verified = true;
-					if(logged) {
-						logged.ws.emit("message", JSON.stringify(verification.packet));
-					}
-				} else if(packet.type == "dismiss") {
-					const verification = awaitingVerification[packet.course].find(v => v.uuid == packet.uuid);
-					if(!verification) return;
-					const logged = loggedIn.find(l => l.clientType == "student" && l.uuid == packet.uuid);
-					if(logged) {
-						logged.ws.send(JSON.stringify({type: "dismiss"}));
-					}
-					awaitingVerification[packet.course] = awaitingVerification[packet.course].filter(v => v.uuid != packet.uuid);
-					broadcastVerifications(this.school, packet.course);
-				} else if(packet.type == "changePassword") {
-					if(this.isAdmin) {
-						this.school.adminPassword = packet.password;
-						await this.school.save();
-					} else {
-						this.thisTeacher.password = packet.password;
-						await this.thisTeacher.save();
-					}
-				} else if(packet.type == "allowRegister") {
-					const course = await Course.findOne({where: {uuid: packet.course}});
-					if(!course) return;
-					course.allowRegister = packet.allow;
-					await course.save();
-					broadcastTeachers(this.school, {type: "allowRegister", course: course.uuid, allow: packet.allow});
-				}
+
+			if(this.clientType == "teacher" && packet.type in teacherPackets) {
+				// @ts-ignore
+				teacherPackets[packet.type](packet, this, this.ws);
+				return;
 			}
-			if(this.clientType == "student") {
-				if(packet.type == "room") {
-					if(!packet.uuid) {
-						this.ws.send(JSON.stringify({type: "room", success: false, error: "Missing uuid"}));
-						return;
-					}
-					const r = await this.school.$get("rooms");
-					const _room = r.find(r => r.uuid == packet.uuid) || null;
-					if(!_room) {
-						this.ws.send(JSON.stringify({type: "room", success: false, error: "Room not found"}));
-						return;
-					}
-					this.room = _room;
-					this.ws.send(JSON.stringify({type: "room", success: true }));
-					return;
-				} else if(packet.type == "login") {
-					if(!packet.name) {
-						this.ws.send(JSON.stringify({type: "login", success: false, error: "Missing name"}));
-						return;
-					}
-					if(!this.room) {
-						this.ws.send(JSON.stringify({type: "login", success: false, error: "You have not joined a room yet"}));
-						return;
-					}
-					this.room.reload();
-					const course = await this.room.$get("course");
-					if(course == null) {
-						this.ws.send(JSON.stringify({type: "login", success: false, error: "Teacher has not set a course yet"}));
-						return;
-					}
-					const s = await course.$get("students");
-					let stud = s.find(s => s.name == capitalizeWords(packet.name.split(" ")).join(" ")) || null;
-					if(!stud) {
-						if(course.allowRegister) {
-							stud = await course.$create("student", {name: capitalizeWords(packet.name.split(" ")).join(" ")}) as Student;
-						} else {
-							this.ws.send(JSON.stringify({type: "login", success: false, error: "Teacher has not allowed registration"}));
-							return;
-						}
-					}
-					let student = stud as Student;
-					console.log("STUDENT LOGS IN WITH NAME: " + student.name);
-					console.log("STUDENT OBJECT IS: " + JSON.stringify(student.toJSON()));
-					this.name = student.name;
-					this.uuid = student.uuid;
-					this.idle = false;
-					this.ws.send(JSON.stringify({type: "login", success: true, student}));
-					// const levelpath = studentLevelpath(student, this.school.isDemo ? demoTasks : tasks);
-					// this.ws.send(JSON.stringify({type: "levelpath", ...levelpath}));
-					this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-					this.ws.send(JSON.stringify({type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)}));
-					await resendLeaderboard(this.school, course);
-					return;
-				}
-				if(!this.name) {
+
+			if(this.clientType == "student" && packet.type in studentPackets) {
+				if(packet.type != "login" && packet.type != "room" && !this.name) {
 					this.ws.send(JSON.stringify({type: "conversationError", success: false, error: "You have not logged in yet"}));
 					this.ws.close();
 					return;
 				}
-				if(packet.type == "info") {
-					this.ws.send(JSON.stringify({ type: "info", name: tasks[packet.level].name, desc: tasks[packet.level].desc }));
-				} else if(packet.type == "task") {
-					const course = await this.room.$get("course");
-					if(course == null) return;
-					if(!course.isRunning) {
-						this.ws.send(JSON.stringify({type: "task", success: false, error: "Course is not running"}));
-						return;
-					}
-					const s = await course.$get("students");
-					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
-					if(!student) return;
-					if(!(packet.section <= student.section)) {
-						this.ws.send(JSON.stringify({type: "task", success: false, error: "You have not completed the previous section yet"}));
-						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-						return;
-					}
-					if(student.section == packet.section) {
-						if(!(packet.level <= student.level)) {
-							this.ws.send(JSON.stringify({type: "task", success: false, error: "You have not completed the previous level yet"}));
-							this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
-							return;
-						}
-					}
-					if(!tasks[packet.section].tasks[packet.level]) {
-						this.ws.send(JSON.stringify({type: "task", success: false, error: "Level not found"}));
-						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
-						return;
-					}
-					this.ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.section].tasks[packet.level] }));
-				} else if(packet.type == "done") {
-					const course = await this.room.$get("course");
-					if(course == null) return;
-					if(!course.isRunning) {
-						this.ws.send(JSON.stringify({type: "done", success: false, error: "Course is not running"}));
-						return;
-					}
-					const s = await course.$get("students");
-					console.log("Da name is", this.name);
-					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
-					if(!student) return;
-					if(!(packet.section <= student.section)) {
-						this.ws.send(JSON.stringify({type: "done", success: false, error: "You have not completed the previous section yet"}));
-						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-						return;
-					}
-					if(packet.level != student.level) {
-						ws.send(JSON.stringify({type: "done", success: true}));
-						return;
-					}
-					if(!tasks[packet.section].tasks[packet.level]) {
-						this.ws.send(JSON.stringify({type: "done", success: false, error: "Level not found"}));
-						this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
-						return;
-					}
-					let canContinue = true;
-					if(TASK_VERIFICATION_NEEDED) {
-						if(!awaitingVerification[course.uuid]?.find(v => v.uuid == this.uuid)?.verified) canContinue = false;
-						const task = tasks[packet.section].tasks[packet.level];
-						if(task.type == "reading") canContinue = true;
-						if("verification" in task && task.verification.type == "notneeded") canContinue = true;
-					}
-					if(canContinue) {
-						student.level++;
-						student.totalLevels++;
-						if(packet.answeredqs) student.answeredqs += packet.answeredqs;
-						if(packet.correctqs) student.correctqs += packet.correctqs;
-						student.achievementdata.completedLevels++;
-						if(student.achievementdata.completedLevels == 5) {
-							if(!student.achievements.includes("fast")) {
-								student.achievements.push("fast");
-							}
-						}
-						// If the student has completed all the levels in the section, move them to the next section
-						console.log("Student level", student.level);
-						console.log("Tasks length", tasks[packet.section].tasks.length);
-						if(student.level >= tasks[packet.section].tasks.length) {
-							console.log("Moving to next section");
-							student.section++;
-							student.level = 0;
-							await student.save();
-							this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-							this.ws.send(JSON.stringify({ type: "sectionDone" }));
-						}
-						await student.save();
-						const leaderboard = await courseLeaderboardJSON(course);
-						if(leaderboard[0] == leaderboard.find(u => u.name == capitalizeWords(this.name.split(" ")).join(" "))) {
-							if(!student.achievements.includes("first")) {
-								student.achievements.push("first");
-								await student.save();
-							}
-						}
-						// for(const logged of loggedIn) {
-						// 	if(logged.clientType == "student") {
-						// 		if(!logged.room) continue;
-						// 		const c = await logged.room.getCourse();
-						// 		if(!c) continue;
-						// 		if(!c.uuid == c.uuid) continue;
-						// 		logged.ws.send(JSON.stringify({type: "leaderboard", ...await courseLeaderboardJSON(await student.getCourse())}));
-						// 	} else if(logged.clientType == "teacher") {
-						// 		if(logged.school.uuid != this.school.uuid) continue;
-						// 		logged.ws.send(JSON.stringify({type: "leaderboard", course, ...await courseLeaderboardJSON(await student.getCourse())}));
-						// 	}
-						// }
-						// broadcastStudentsInCourse(course, {type: "leaderboard", leaderboard: await courseLeaderboardJSON(course)});
-						// broadcastTeachers(this.school, {type: "leaderboard", course, leaderboard: await courseLeaderboardJSON(course)});
-						await resendLeaderboard(this.school, course);
-						ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
-						ws.send(JSON.stringify({type: "done", success: true}));
-						if(awaitingVerification[course.uuid]?.find(v => v.uuid == this.uuid)?.verified) {
-							awaitingVerification[course.uuid] = awaitingVerification[course.uuid].filter(v => v.uuid != this.uuid);
-							broadcastVerifications(this.school, course.uuid);
-						}
-					} else {
-						if(!awaitingVerification[course.uuid]) awaitingVerification[course.uuid] = [];
-						if(awaitingVerification[course.uuid].find(v => v.uuid == this.uuid)) {
-							this.ws.send(JSON.stringify({type: "done", success: false, error: "You have already submitted a task for verification"}));
-							return;
-						}
-						awaitingVerification[course.uuid].push({ uuid: this.uuid, packet, verified: false });
-						broadcastVerifications(this.school, course.uuid);
-					}
-				} else if(packet.type == "idleStateChange") {
-					if(packet.idle === undefined) {
-						this.ws.send(JSON.stringify({type: "idleStateChange", success: false, error: "Missing idle state"}));
-						return;
-					}
-					this.idle = packet.idle;
-					console.log(this.idle);
-					const course = await this.room.$get("course");
-					console.log(course);
-					if(course == null) return;
-					console.log("A");
-					await resendLeaderboard(this.school, course);
-				} else if(packet.type == "getSection") {
-					console.log(packet);
-					if(packet.section == undefined) {
-						this.ws.send(JSON.stringify({type: "getSection", success: false, error: "Missing section id"}));
-						return;
-					}
-					const course = await this.room.$get("course");
-					if(course == null) return;
-					const s = await course.$get("students");
-					const student = s.find(s => s.name == capitalizeWords(this.name.split(" ")).join(" ")) || null;
-					if(!student) return;
-					if(!(packet.section <= student.section)) {
-						this.ws.send(JSON.stringify({type: "getSection", success: false, error: "You have not completed the previous section yet"}));
-						this.ws.send(JSON.stringify({type: "sections", ...studentSections(student, this.school.isDemo ? demoTasks : tasks)}));
-						return;
-					}
-					this.ws.send(JSON.stringify({type: "levelpath", ...studentLevelpath(student, this.school.isDemo ? demoTasks : tasks, packet.section)}));
-				} else if(packet.type == "startGroup") {
-					const course = await this.room.$get("course") as Course;
-					if(course == null) return;
-					// const group = await course.$create("codeGroup", {}) as CodeGroup;
-					const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // 6 character code
-					const group = await CodeGroup.create({courseUuid: course.uuid, code});
-					if(!group) return;
-					peopleInGroup[group.uuid] = [this];
-					this.ws.send(JSON.stringify({type: "startGroup", success: true, group}));
-				} else if(packet.type == "joinGroup") {
-					const course = await this.room.$get("course");
-					if(course == null) return;
-					const group = await CodeGroup.findOne({where: {code: packet.group, courseUuid: course.uuid}});
-					if(!group) {
-						this.ws.send(JSON.stringify({type: "joinGroup", success: false, error: "Group not found"}));
-						return;
-					}
-					const people = peopleInGroup[group.uuid];
-					people.push(this);
-					this.ws.send(JSON.stringify({type: "joinGroup", success: true, group}));
-					if(!peopleInGroupRequestingSync[packet.group]) peopleInGroupRequestingSync[packet.group] = [this];
-					else peopleInGroupRequestingSync[packet.group].push(this);
-					let randomPerson;
-					let att = 30;
-					while(!randomPerson || randomPerson == this) {
-						randomPerson = people[Math.floor(Math.random() * people.length)];
-						if(att-- == 0) break;
-					}
-					randomPerson.ws.send(JSON.stringify({type: "syncGroup"}));
-				} else if(packet.type == "groupCode") {
-					// Response to syncGroup request
-					const peopleRequesting = peopleInGroupRequestingSync[packet.group];
-					if(!peopleRequesting) return;
-					for(const person of peopleRequesting) {
-						person.ws.send(JSON.stringify({type: "groupCode", code: packet.code}));
-						peopleInGroupRequestingSync[packet.group].splice(peopleInGroupRequestingSync[packet.group].findIndex(p => p == person), 1);
-					}
-					if(peopleRequesting.length == 0) {
-						delete peopleInGroupRequestingSync[packet.group];
-					}
-				} else if(packet.type == "leaveGroup") {
-					peopleInGroup[packet.group].splice(peopleInGroup[packet.group].findIndex(p => p == this), 1);
-					if(peopleInGroup[packet.group].length == 0) {
-						delete peopleInGroup[packet.group];
-						const group = await CodeGroup.findOne({where: {uuid: packet.group}});
-						if(group) await group.destroy();
-					}
-					this.ws.send(JSON.stringify({type: "leaveGroup", success: true}));
-				} else if(packet.type == "syncGroup") {
-					const people = peopleInGroup[packet.group];
-					if(!people) return;
-					if(!peopleInGroupRequestingSync[packet.group]) peopleInGroupRequestingSync[packet.group] = [this];
-					else peopleInGroupRequestingSync[packet.group].push(this);
-					let randomPerson;
-					let att = 30;
-					while(!randomPerson || randomPerson == this) {
-						randomPerson = people[Math.floor(Math.random() * people.length)];
-						if(att-- == 0) break;
-					}
-					randomPerson.ws.send(JSON.stringify({type: "syncGroup"}));
-				} else if(packet.type == "groupAction") {
-					const people = peopleInGroup[packet.group];
-					console.log(people);
-					console.log(peopleInGroup);
-					if(!people) return;
-					for(const person of people) {
-						if(person == this) continue;
-						person.ws.send(JSON.stringify({type: "groupAction", action: packet.action}));
-					}
-				}
+				// @ts-ignore
+				studentPackets[packet.type](packet, this, this.ws);
+				return;
 			}
+
+			// If we get here, the packet is not handled
+			this.ws.send(JSON.stringify({type: "conversationError", error: "Unable to handle packet"}))
 		});
 		this.ws.on("close", async () => {
 			loggedIn.splice(loggedIn.indexOf(this), 1);
