@@ -1,5 +1,5 @@
 import z from "zod";
-import { lastPing } from "../main";
+import { lastPing } from "../main.js";
 export const InPongPacket = z.object({
     type: z.literal("pong")
 });

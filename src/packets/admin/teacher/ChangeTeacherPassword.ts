@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Connection } from "../../../connection";
-import Teacher from "../../../model/teacher";
+import { Connection } from "../../../connection.js";
+import Teacher from "../../../model/teacher.js";
 import { WebSocket } from "ws";
 
 export const InChangeTeacherPasswordPacket = z.object({

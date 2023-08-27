@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { broadcastAdmins } from "../../../connection";
+import { broadcastAdmins } from "../../../connection.js";
 export const InAddTeacherPacket = z.object({
     type: z.literal("addTeacher"),
     username: z.string(),

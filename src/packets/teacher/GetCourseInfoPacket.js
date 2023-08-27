@@ -1,6 +1,6 @@
 import z from "zod";
-import Course from "../../model/course";
-import { courseLeaderboardJSON } from "../../utils";
+import Course from "../../model/course.js";
+import { courseLeaderboardJSON } from "../../utils.js";
 export const InGetCourseInfoPacket = z.object({
     type: z.literal("getCourseInfo"),
     uuid: z.string()

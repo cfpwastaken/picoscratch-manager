@@ -1,7 +1,7 @@
 import z from "zod";
-import { broadcastTeachers } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { broadcastTeachers } from "../../connection.js";
+import Course from "../../model/course.js";
+import Room from "../../model/room.js";
 export const InSetActiveCoursePacket = z.object({
     type: z.literal("setActiveCourse"),
     uuid: z.string(),

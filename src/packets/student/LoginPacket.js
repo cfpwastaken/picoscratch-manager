@@ -1,7 +1,7 @@
 import z from "zod";
-import { resendLeaderboard } from "../../connection";
-import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { resendLeaderboard } from "../../connection.js";
+import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 export const InLoginPacket = z.object({
     type: z.literal("login"),
     name: z.string()
@@ -40,7 +40,7 @@ export async function handleLoginPacket(packet, con, ws) {
             return;
         }
     }
-    let student = stud;
+    const student = stud;
     console.log("Student", student.name, "logged in", JSON.stringify(student.toJSON(), null, 2));
     con.name = student.name;
     con.uuid = student.uuid;

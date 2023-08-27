@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection, resendLeaderboard } from "../../connection";
-import Student from "../../model/student";
-import { loggedIn } from "../../main";
+import { Connection, resendLeaderboard } from "../../connection.js";
+import Student from "../../model/student.js";
+import { loggedIn } from "../../main.js";
 import { WebSocket } from "ws";
 
 export const InDeletePacket = z.object({

@@ -1,5 +1,5 @@
 import z from "zod";
-import Room from "../../model/room";
+import Room from "../../model/room.js";
 export const InRoomPacket = z.object({
     type: z.literal("room"),
     uuid: z.string()

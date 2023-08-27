@@ -1,6 +1,6 @@
 import z from "zod";
-import { capitalizeWords, studentLevelpath, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { capitalizeWords, studentLevelpath, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 export const InTaskPacket = z.object({
     type: z.literal("task"),
     level: z.number(),

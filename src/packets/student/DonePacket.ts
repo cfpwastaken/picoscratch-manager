@@ -1,8 +1,8 @@
 import z from "zod";
-import { Connection, TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastVerifications, resendLeaderboard } from "../../connection";
+import { Connection, TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastVerifications, resendLeaderboard } from "../../connection.js";
 import { WebSocket } from "ws";
-import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 
 export const InDonePacket = z.object({
 	type: z.literal("done"),

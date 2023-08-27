@@ -1,6 +1,6 @@
 import z from "zod";
-import { broadcastAdmins } from "../../../connection";
-import Course from "../../../model/course";
+import { broadcastAdmins } from "../../../connection.js";
+import Course from "../../../model/course.js";
 export const InDeleteCoursePacket = z.object({
     type: z.literal("deleteCourse"),
     uuid: z.string()

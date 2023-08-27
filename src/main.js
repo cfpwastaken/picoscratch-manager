@@ -45,7 +45,7 @@ app.use((req, res, next) => {
     next();
 });
 if (process.argv.includes("maintenance")) {
-    app.use((req, res, next) => {
+    app.use((req, res) => {
         return res.status(503).sendFile("web/maintenance.html", { root: __dirname });
     });
 }
@@ -88,7 +88,7 @@ app.post("/api/makeSchool", async (req, res) => {
         fd.append("secret", SECRET);
         fd.append("response", token);
         fd.append("remoteip", ip);
-        let cf_res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        const cf_res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
             method: "POST",
             body: fd
         }).then(res => res.json());

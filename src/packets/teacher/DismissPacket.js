@@ -1,6 +1,6 @@
 import z from "zod";
-import { awaitingVerification, broadcastVerifications } from "../../connection";
-import { loggedIn } from "../../main";
+import { awaitingVerification, broadcastVerifications } from "../../connection.js";
+import { loggedIn } from "../../main.js";
 export const InDismissPacket = z.object({
     type: z.literal("dismiss"),
     uuid: z.string(),

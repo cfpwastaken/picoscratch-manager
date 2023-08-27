@@ -1,7 +1,7 @@
 import z from "zod";
-import { resendLeaderboard } from "../../connection";
-import Student from "../../model/student";
-import { loggedIn } from "../../main";
+import { resendLeaderboard } from "../../connection.js";
+import Student from "../../model/student.js";
+import { loggedIn } from "../../main.js";
 export const InDeletePacket = z.object({
     type: z.literal("delete"),
     uuid: z.string(),

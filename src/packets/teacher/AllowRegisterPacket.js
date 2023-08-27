@@ -1,6 +1,6 @@
 import z from "zod";
-import { broadcastTeachers } from "../../connection";
-import Course from "../../model/course";
+import { broadcastTeachers } from "../../connection.js";
+import Course from "../../model/course.js";
 export const InAllowRegisterPacket = z.object({
     type: z.literal("allowRegister"),
     course: z.string(),

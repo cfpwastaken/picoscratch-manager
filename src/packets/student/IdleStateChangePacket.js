@@ -1,5 +1,5 @@
 import z from "zod";
-import { resendLeaderboard } from "../../connection";
+import { resendLeaderboard } from "../../connection.js";
 export const InIdleStateChangePacket = z.object({
     type: z.literal("idleStateChange"),
     idle: z.boolean()

@@ -1,6 +1,6 @@
 import z from "zod";
-import { awaitingVerification } from "../../connection";
-import { loggedIn } from "../../main";
+import { awaitingVerification } from "../../connection.js";
+import { loggedIn } from "../../main.js";
 export const InVerifyPacket = z.object({
     type: z.literal("verify"),
     uuid: z.string(),

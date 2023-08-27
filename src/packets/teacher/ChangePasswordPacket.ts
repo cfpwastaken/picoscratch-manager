@@ -1,5 +1,5 @@
 import z from "zod";
-import { Connection } from "../../connection";
+import { Connection } from "../../connection.js";
 import { WebSocket } from "ws";
 
 export const InChangePasswordPacket = z.object({

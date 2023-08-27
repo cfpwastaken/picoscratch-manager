@@ -1,5 +1,5 @@
 import z from "zod";
-import { Connection, resendLeaderboard } from "../../connection";
+import { Connection, resendLeaderboard } from "../../connection.js";
 import { WebSocket } from "ws";
 
 export const InIdleStateChangePacket = z.object({

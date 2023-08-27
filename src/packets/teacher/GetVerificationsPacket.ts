@@ -1,5 +1,5 @@
 import z from "zod";
-import { Connection, sendVerifications } from "../../connection";
+import { Connection, sendVerifications } from "../../connection.js";
 import { WebSocket } from "ws";
 
 export const InGetVerificationsPacket = z.object({

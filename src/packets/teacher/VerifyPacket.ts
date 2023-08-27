@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection, awaitingVerification } from "../../connection";
+import { Connection, awaitingVerification } from "../../connection.js";
 import { WebSocket } from "ws";
-import { loggedIn } from "../../main";
+import { loggedIn } from "../../main.js";
 
 export const InVerifyPacket = z.object({
 	type: z.literal("verify"),

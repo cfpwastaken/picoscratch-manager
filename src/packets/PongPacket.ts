@@ -1,6 +1,6 @@
 import z from "zod";
-import { Connection } from "../connection";
-import { lastPing } from "../main";
+import { Connection } from "../connection.js";
+import { lastPing } from "../main.js";
 import { WebSocket } from "ws";
 
 export const InPongPacket = z.object({

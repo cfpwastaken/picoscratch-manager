@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection } from "../../connection";
+import { Connection } from "../../connection.js";
 import { WebSocket } from "ws";
-import { tasks } from "../../main";
+import { tasks } from "../../main.js";
 
 export const InInfoPacket = z.object({
 	type: z.literal("info"),

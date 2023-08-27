@@ -1,5 +1,5 @@
 import z from "zod";
-import { tasks } from "../../main";
+import { tasks } from "../../main.js";
 export const InInfoPacket = z.object({
     type: z.literal("info"),
     level: z.number()

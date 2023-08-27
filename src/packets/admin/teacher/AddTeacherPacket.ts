@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Connection, broadcastAdmins } from "../../../connection";
+import { Connection, broadcastAdmins } from "../../../connection.js";
 import { WebSocket } from "ws";
 
 export const InAddTeacherPacket = z.object({

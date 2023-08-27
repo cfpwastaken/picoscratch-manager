@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection, broadcastTeachers } from "../../connection";
-import Course from "../../model/course";
-import Room from "../../model/room";
+import { Connection, broadcastTeachers } from "../../connection.js";
+import Course from "../../model/course.js";
+import Room from "../../model/room.js";
 import { WebSocket } from "ws";
 
 export const InSetActiveCoursePacket = z.object({

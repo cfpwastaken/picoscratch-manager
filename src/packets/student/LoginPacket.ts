@@ -1,9 +1,9 @@
 import z from "zod";
-import { Connection, resendLeaderboard } from "../../connection";
+import { Connection, resendLeaderboard } from "../../connection.js";
 import { WebSocket } from "ws";
-import Student from "../../model/student";
-import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import Student from "../../model/student.js";
+import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 
 export const InLoginPacket = z.object({
 	type: z.literal("login"),

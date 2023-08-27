@@ -1,6 +1,6 @@
 import z from "zod";
-import { Connection } from "../../connection";
-import Room from "../../model/room";
+import { Connection } from "../../connection.js";
+import Room from "../../model/room.js";
 import { WebSocket } from "ws";
 
 export const InRoomPacket = z.object({

@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection } from "../../connection";
-import Course from "../../model/course";
-import { courseLeaderboardJSON } from "../../utils";
+import { Connection } from "../../connection.js";
+import Course from "../../model/course.js";
+import { courseLeaderboardJSON } from "../../utils.js";
 import { WebSocket } from "ws";
 
 export const InGetCourseInfoPacket = z.object({

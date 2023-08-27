@@ -1,5 +1,5 @@
 import { z } from "zod";
-import Teacher from "../../../model/teacher";
+import Teacher from "../../../model/teacher.js";
 export const InChangeTeacherPasswordPacket = z.object({
     type: z.literal("changeTeacherPassword"),
     uuid: z.string(),

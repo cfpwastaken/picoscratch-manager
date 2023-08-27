@@ -1,6 +1,6 @@
 import z from "zod";
-import { broadcastStudentsInCourse, broadcastTeachers } from "../../connection";
-import Course from "../../model/course";
+import { broadcastStudentsInCourse, broadcastTeachers } from "../../connection.js";
+import Course from "../../model/course.js";
 export const InStopCoursePacket = z.object({
     type: z.literal("stopCourse"),
     uuid: z.string()

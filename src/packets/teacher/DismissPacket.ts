@@ -1,7 +1,7 @@
 import z from "zod";
-import { Connection, awaitingVerification, broadcastVerifications } from "../../connection";
+import { Connection, awaitingVerification, broadcastVerifications } from "../../connection.js";
 import { WebSocket } from "ws";
-import { loggedIn } from "../../main";
+import { loggedIn } from "../../main.js";
 
 export const InDismissPacket = z.object({
 	type: z.literal("dismiss"),

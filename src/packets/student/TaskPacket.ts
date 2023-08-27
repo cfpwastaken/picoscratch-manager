@@ -1,8 +1,8 @@
 import z from "zod";
-import { Connection } from "../../connection";
+import { Connection } from "../../connection.js";
 import { WebSocket } from "ws";
-import { capitalizeWords, studentLevelpath, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { capitalizeWords, studentLevelpath, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 
 export const InTaskPacket = z.object({
 	type: z.literal("task"),

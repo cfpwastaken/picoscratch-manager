@@ -1,6 +1,6 @@
 import z from "zod";
-import Student from "../../model/student";
-import { loggedIn } from "../../main";
+import Student from "../../model/student.js";
+import { loggedIn } from "../../main.js";
 export const InKickPacket = z.object({
     type: z.literal("kick"),
     uuid: z.string()

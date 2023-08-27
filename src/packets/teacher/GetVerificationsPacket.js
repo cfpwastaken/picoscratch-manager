@@ -1,5 +1,5 @@
 import z from "zod";
-import { sendVerifications } from "../../connection";
+import { sendVerifications } from "../../connection.js";
 export const InGetVerificationsPacket = z.object({
     type: z.literal("getVerifications"),
     course: z.string()

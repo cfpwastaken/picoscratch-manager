@@ -1,6 +1,6 @@
 import z from "zod";
-import { Connection, broadcastAdmins } from "../../../connection";
-import Room from "../../../model/room";
+import { Connection, broadcastAdmins } from "../../../connection.js";
+import Room from "../../../model/room.js";
 import { WebSocket } from "ws";
 
 export const InDeleteRoomPacket = z.object({

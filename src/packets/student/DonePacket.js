@@ -1,7 +1,7 @@
 import z from "zod";
-import { TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastVerifications, resendLeaderboard } from "../../connection";
-import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils";
-import { demoTasks, tasks } from "../../main";
+import { TASK_VERIFICATION_NEEDED, awaitingVerification, broadcastVerifications, resendLeaderboard } from "../../connection.js";
+import { capitalizeWords, courseLeaderboardJSON, studentLevelpath, studentSections } from "../../utils.js";
+import { demoTasks, tasks } from "../../main.js";
 export const InDonePacket = z.object({
     type: z.literal("done"),
     level: z.number(),

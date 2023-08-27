@@ -1,10 +1,10 @@
 import z from "zod";
-import School from "../model/school";
-import Teacher from "../model/teacher";
-import Course from "../model/course";
-import Room from "../model/room";
-import { Connection } from "../connection";
-import { authenticate } from "../utils";
+import School from "../model/school.js";
+import Teacher from "../model/teacher.js";
+import Course from "../model/course.js";
+import Room from "../model/room.js";
+import { Connection } from "../connection.js";
+import { authenticate } from "../utils.js";
 import sequelize from "sequelize";
 import { WebSocket } from "ws";
 
