@@ -39,6 +39,20 @@ __decorate([
     })
 ], Course.prototype, "allowRegister", void 0);
 __decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.INTEGER,
+        defaultValue: -1
+    })
+], Course.prototype, "maxSection", void 0);
+__decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.INTEGER,
+        defaultValue: -1
+    })
+], Course.prototype, "maxLevel", void 0);
+__decorate([
     ForeignKey(() => School)
 ], Course.prototype, "schoolUuid", void 0);
 __decorate([

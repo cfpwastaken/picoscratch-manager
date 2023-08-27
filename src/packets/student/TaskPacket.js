@@ -35,5 +35,10 @@ export async function handleTaskPacket(packet, con, ws) {
         ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, con.school.isDemo ? demoTasks : tasks, packet.section) }));
         return;
     }
+    // Max level check
+    if (packet.section >= course.maxSection && packet.level > course.maxLevel) {
+        ws.send(JSON.stringify({ type: "task", success: false, error: "Max level reached" }));
+        return;
+    }
     ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.section].tasks[packet.level] }));
 }

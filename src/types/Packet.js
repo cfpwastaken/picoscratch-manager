@@ -127,6 +127,15 @@ export const InAllowRegisterPacket = z.object({
     course: z.string(),
     allow: z.boolean()
 });
+export const InGetTasksPacket = z.object({
+    type: z.literal("getTasks")
+});
+export const InMaxLevelPacket = z.object({
+    type: z.literal("maxLevel"),
+    course: z.string(),
+    maxSection: z.number(),
+    maxLevel: z.number()
+});
 export const InTeacherPackets = z.union([
     InSetActiveCoursePacket,
     InStartCoursePacket,
@@ -139,7 +148,9 @@ export const InTeacherPackets = z.union([
     InVerifyPacket,
     InDismissPacket,
     InChangePasswordPacket,
-    InAllowRegisterPacket
+    InAllowRegisterPacket,
+    InGetTasksPacket,
+    InMaxLevelPacket
 ]);
 export const InRoomPacket = z.object({
     type: z.literal("room"),

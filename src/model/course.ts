@@ -37,6 +37,20 @@ export default class Course extends Model {
 	})
 	declare allowRegister: boolean;
 
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.INTEGER,
+		defaultValue: -1
+	})
+	declare maxSection: number;
+
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.INTEGER,
+		defaultValue: -1
+	})
+	declare maxLevel: number;
+
   @ForeignKey(() => School)
 	declare schoolUuid: string;
 

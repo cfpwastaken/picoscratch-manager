@@ -30,6 +30,8 @@ import { handleInfoPacket } from "./packets/student/InfoPacket.js";
 import { handleLoginPacket } from "./packets/student/LoginPacket.js";
 import { handleRoomPacket } from "./packets/student/RoomPacket.js";
 import { handleTaskPacket } from "./packets/student/TaskPacket.js";
+import { handleGetTasksPacket } from "./packets/teacher/GetTasksPacket.js";
+import { handleMaxLevelPacket } from "./packets/teacher/MaxLevelPacket.js";
 export const TASK_VERIFICATION_NEEDED = true;
 export const awaitingVerification = {};
 export const peopleInGroup = {};
@@ -113,6 +115,7 @@ const adminPackets = {
 const teacherPackets = {
     // Course
     allowRegister: handleAllowRegisterPacket,
+    maxLevel: handleMaxLevelPacket,
     getCourseInfo: handleGetCourseInfoPacket,
     getVerifications: handleGetVerificationsPacket,
     setActiveCourse: handleSetActiveCoursePacket,
@@ -125,7 +128,8 @@ const teacherPackets = {
     dismiss: handleDismissPacket,
     verify: handleVerifyPacket,
     // Other
-    changePassword: handleChangePasswordPacket
+    changePassword: handleChangePasswordPacket,
+    getTasks: handleGetTasksPacket
 };
 const studentPackets = {
     room: handleRoomPacket,
