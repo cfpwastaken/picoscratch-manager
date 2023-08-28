@@ -72,7 +72,7 @@ async function handleTeacherHiPacket(packet, con, ws) {
         const t = await Teacher.findOne({ where: {
                 schoolUuid: con.school.uuid,
                 username: sequelize.where(sequelize.fn("LOWER", sequelize.col("username")), "LIKE", "%" + packet.username.toLowerCase() + "%")
-            }, include: [Course, Room] });
+            } });
         if (!t) {
             ws.send(JSON.stringify({
                 type: "hi",
