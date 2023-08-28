@@ -156,7 +156,7 @@
 						"previousBlock": "pin_on"
 					},
 					{
-						"text": "Schalte die LED wieder aus mit einem \"Schalte LED aus\" Block",
+						"text": "Schalte die LED wieder aus mit einem \"Schalte Pin aus\" Block",
 						"block": "pin_off",
 						"previousBlock": "control_wait"
 					},
