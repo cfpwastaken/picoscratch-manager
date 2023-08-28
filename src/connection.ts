@@ -192,26 +192,32 @@ export class Connection {
 				return;
 			}
 
-			if(this.clientType == "teacher" && this.isAdmin && packet.type in adminPackets) {
-				// @ts-ignore
-				adminPackets[packet.type](packet, this, this.ws);
-				return;
-			}
-
-			if(this.clientType == "teacher" && packet.type in teacherPackets) {
-				// @ts-ignore
-				teacherPackets[packet.type](packet, this, this.ws);
-				return;
-			}
-
-			if(this.clientType == "student" && packet.type in studentPackets) {
-				if(packet.type != "login" && packet.type != "room" && !this.name) {
-					this.ws.send(JSON.stringify({type: "conversationError", success: false, error: "You have not logged in yet"}));
-					this.ws.close();
+			try {
+				if(this.clientType == "teacher" && this.isAdmin && packet.type in adminPackets) {
+					// @ts-ignore
+					adminPackets[packet.type](packet, this, this.ws);
 					return;
 				}
-				// @ts-ignore
-				studentPackets[packet.type](packet, this, this.ws);
+	
+				if(this.clientType == "teacher" && packet.type in teacherPackets) {
+					// @ts-ignore
+					teacherPackets[packet.type](packet, this, this.ws);
+					return;
+				}
+	
+				if(this.clientType == "student" && packet.type in studentPackets) {
+					if(packet.type != "login" && packet.type != "room" && !this.name) {
+						this.ws.send(JSON.stringify({type: "conversationError", success: false, error: "You have not logged in yet"}));
+						this.ws.close();
+						return;
+					}
+					// @ts-ignore
+					studentPackets[packet.type](packet, this, this.ws);
+					return;
+				}
+			} catch(e) {
+				this.ws.send(JSON.stringify({type: "serverError", error: "An error occured while handling your packet", e}));
+				console.error(e);
 				return;
 			}
 
