@@ -1,11 +1,12 @@
 import { compare } from "bcrypt";
-import { loggedIn } from "./main.js";
+import { codingTasks, demoTasks, loggedIn } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
 import Student from "./model/student.js";
 import Teacher from "./model/teacher.js";
 import { Tasks } from "./types/Task.js";
+import { tasks } from "./check.js";
 
 export function hasJsonStructure(str: string) {
 	if(typeof str !== "string") return false;
@@ -95,4 +96,17 @@ export async function authenticate(uuid: string, username: string, password: str
 	if(!t) return {error: "Invalid username", admin: false};
 	if(!(await compare(password, t.password))) return {error: "Wrong password", admin: false};
 	return {success: true, admin: false};
+}
+
+export async function getTasksForCourse(courseUUID: string): Promise<Tasks> {
+	const c = await Course.findOne({ where: { uuid: courseUUID } });
+	if(!c) throw new Error("Course not found");
+	const school = await c.$get("school");
+	if(!school) throw new Error("School not found");
+
+	if(school.isDemo) {
+		return demoTasks as Tasks;
+	}
+
+	return codingTasks[c.courseType] as Tasks;
 }

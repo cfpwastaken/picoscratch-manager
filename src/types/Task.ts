@@ -142,8 +142,10 @@ export const Section = z.object({
 
 // export const Tasks = z.array(Task);
 export const Tasks = z.array(Section);
+export const TasksFile = z.record(Tasks);
 
 // TS Types
+export type TasksFile = z.infer<typeof TasksFile>;
 export type Task = z.infer<typeof Task>;
 export type Section = z.infer<typeof Section>;
 export type Tasks = z.infer<typeof Tasks>;

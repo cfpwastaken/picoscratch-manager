@@ -1,5 +1,5 @@
 import { compare } from "bcrypt";
-import { loggedIn } from "./main.js";
+import { codingTasks, demoTasks, loggedIn } from "./main.js";
 import Course from "./model/course.js";
 import Room from "./model/room.js";
 import School from "./model/school.js";
@@ -91,4 +91,16 @@ export async function authenticate(uuid, username, password) {
     if (!(await compare(password, t.password)))
         return { error: "Wrong password", admin: false };
     return { success: true, admin: false };
+}
+export async function getTasksForCourse(courseUUID) {
+    const c = await Course.findOne({ where: { uuid: courseUUID } });
+    if (!c)
+        throw new Error("Course not found");
+    const school = await c.$get("school");
+    if (!school)
+        throw new Error("School not found");
+    if (school.isDemo) {
+        return demoTasks;
+    }
+    return codingTasks[c.courseType];
 }

@@ -1,7 +1,6 @@
 import z from "zod";
 import { resendLeaderboard } from "../../connection.js";
-import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils.js";
-import { demoTasks, tasks } from "../../main.js";
+import { capitalizeWords, courseLeaderboardJSON, getTasksForCourse, studentSections } from "../../utils.js";
 export const InLoginPacket = z.object({
     type: z.literal("login"),
     name: z.string()
@@ -52,11 +51,15 @@ export async function handleLoginPacket(packet, con, ws) {
     }));
     ws.send(JSON.stringify({
         type: "sections",
-        ...studentSections(student, con.school.isDemo ? demoTasks : tasks)
+        ...studentSections(student, await getTasksForCourse(course.uuid))
     }));
     ws.send(JSON.stringify({
         type: "leaderboard",
         leaderboard: await courseLeaderboardJSON(course)
     }));
     await resendLeaderboard(con.school, course);
+    ws.send(JSON.stringify({
+        type: "courseType",
+        courseType: course.courseType
+    }));
 }

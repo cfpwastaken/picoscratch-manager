@@ -2,8 +2,8 @@ import z from "zod";
 import { Connection, resendLeaderboard } from "../../connection.js";
 import { WebSocket } from "ws";
 import Student from "../../model/student.js";
-import { capitalizeWords, courseLeaderboardJSON, studentSections } from "../../utils.js";
-import { demoTasks, tasks } from "../../main.js";
+import { capitalizeWords, courseLeaderboardJSON, getTasksForCourse, studentSections } from "../../utils.js";
+import { demoTasks, codingTasks } from "../../main.js";
 
 export const InLoginPacket = z.object({
 	type: z.literal("login"),
@@ -58,7 +58,7 @@ export async function handleLoginPacket(packet: InLoginPacket, con: Connection, 
 
 	ws.send(JSON.stringify({
 		type: "sections",
-		...studentSections(student, con.school.isDemo ? demoTasks : tasks)
+		...studentSections(student, await getTasksForCourse(course.uuid))
 	}));
 
 	ws.send(JSON.stringify({
@@ -67,4 +67,9 @@ export async function handleLoginPacket(packet: InLoginPacket, con: Connection, 
 	}));
 
 	await resendLeaderboard(con.school, course);
+
+	ws.send(JSON.stringify({
+		type: "courseType",
+		courseType: course.courseType
+	}));
 }

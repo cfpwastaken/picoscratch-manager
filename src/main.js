@@ -12,7 +12,7 @@ import Room from "./model/room.js";
 import Support from "./model/support.js";
 import { readFile } from "fs/promises";
 import { Connection } from "./connection.js";
-import { Tasks } from "./types/Task.js";
+import { TasksFile } from "./types/Task.js";
 import CodeGroup from "./model/codegroups.js";
 import { z } from "zod";
 const __dirname = new URL(".", import.meta.url).pathname;
@@ -22,9 +22,9 @@ export const sql = new Sequelize(process.env.MYSQL_DB || "picoscratch", process.
     models: [School, Teacher, Course, Student, Room, Support, CodeGroup]
 });
 const rawTasks = JSON.parse(await readFile("tasks.json", "utf8"));
-Tasks.parse(rawTasks); // If this fails, the app will error out, as there is no reason to continue if the tasks are invalid
-export const tasks = rawTasks;
-export const demoTasks = tasks.slice(0, 4);
+TasksFile.parse(rawTasks); // If this fails, the app will error out, as there is no reason to continue if the tasks are invalid
+export const codingTasks = rawTasks;
+export const demoTasks = codingTasks.coding.slice(0, 4);
 let errored = false;
 process.on("uncaughtException", (err) => {
     console.error(err);

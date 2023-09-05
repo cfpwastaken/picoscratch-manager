@@ -51,6 +51,13 @@ export default class Course extends Model {
 	})
 	declare maxLevel: number;
 
+	@AllowNull(false)
+	@Column({
+		type: DataTypes.STRING,
+		defaultValue: "coding"
+	})
+	declare courseType: string;
+
   @ForeignKey(() => School)
 	declare schoolUuid: string;
 

@@ -53,6 +53,13 @@ __decorate([
     })
 ], Course.prototype, "maxLevel", void 0);
 __decorate([
+    AllowNull(false),
+    Column({
+        type: DataTypes.STRING,
+        defaultValue: "coding"
+    })
+], Course.prototype, "courseType", void 0);
+__decorate([
     ForeignKey(() => School)
 ], Course.prototype, "schoolUuid", void 0);
 __decorate([

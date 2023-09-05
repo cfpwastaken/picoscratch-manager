@@ -1,6 +1,5 @@
 import z from "zod";
-import { capitalizeWords, studentLevelpath, studentSections } from "../../utils.js";
-import { demoTasks, tasks } from "../../main.js";
+import { capitalizeWords, getTasksForCourse, studentLevelpath, studentSections } from "../../utils.js";
 export const InTaskPacket = z.object({
     type: z.literal("task"),
     level: z.number(),
@@ -18,21 +17,22 @@ export async function handleTaskPacket(packet, con, ws) {
     const student = s.find(s => s.name == capitalizeWords(con.name.split(" ")).join(" ")) || null;
     if (!student)
         return;
+    const courseTasks = await getTasksForCourse(course.uuid);
     if (!(packet.section <= student.section)) {
         ws.send(JSON.stringify({ type: "task", success: false, error: "You have not completed the previous section yet" }));
-        ws.send(JSON.stringify({ type: "sections", ...studentSections(student, con.school.isDemo ? demoTasks : tasks) }));
+        ws.send(JSON.stringify({ type: "sections", ...studentSections(student, courseTasks) }));
         return;
     }
     if (student.section == packet.section) {
         if (!(packet.level <= student.level)) {
             ws.send(JSON.stringify({ type: "task", success: false, error: "You have not completed the previous level yet" }));
-            ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, con.school.isDemo ? demoTasks : tasks, packet.section) }));
+            ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, courseTasks, packet.section) }));
             return;
         }
     }
-    if (!tasks[packet.section].tasks[packet.level]) {
+    if (!courseTasks[packet.section].tasks[packet.level]) {
         ws.send(JSON.stringify({ type: "task", success: false, error: "Level not found" }));
-        ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, con.school.isDemo ? demoTasks : tasks, packet.section) }));
+        ws.send(JSON.stringify({ type: "levelpath", ...studentLevelpath(student, courseTasks, packet.section) }));
         return;
     }
     // Max level check
@@ -42,5 +42,5 @@ export async function handleTaskPacket(packet, con, ws) {
             return;
         }
     }
-    ws.send(JSON.stringify({ type: "task", success: true, task: tasks[packet.section].tasks[packet.level] }));
+    ws.send(JSON.stringify({ type: "task", success: true, task: courseTasks[packet.section].tasks[packet.level] }));
 }
