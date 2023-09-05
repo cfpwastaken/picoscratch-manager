@@ -258,15 +258,22 @@
 							"previousBlock": "event_whenflagclicked"
 						},
 						{
-							"text": "Nehme einen \"Setze Pin Tastverhältnis\" Block",
-							"block": "pwm_duty",
-							"parentBlock": "control_forever"
+							"text": "Nehme einen \"Setze Pin Tastverhältnis (-> 255)\" Block",
+							"block": "pwm_duty_255",
+							"parentBlock": "control_forever",
+							"blockTag": "setpwm"
 						},
 						{
-							"text": "Nehme einen \"Pin Analogwert\" Block und setze ihn in das zweite Feld",
-							"block": "adc_read",
+							"text": "Nehme einen \"Pin Analogwert (-> 255)\" Block und setze ihn in das zweite Feld",
+							"block": "adc_read_255",
 							"parentBlock": "pwm_duty",
 							"blockTag": "poti"
+						},
+						{
+							"text": "In das ZWEITE Feld.",
+							"type": "moveevent",
+							"input": "DUTY",
+							"parentTag": "setpwm"
 						},
 						{
 							"type": "changeblock",
@@ -387,7 +394,7 @@
 						},
 						{
 							"type": "changeblock",
-							"text": "Setze die Helligkeit zu 0",
+							"text": "Setze den Wert auf 0",
 							"targetBlockTag": "firstresetblock",
 							"name": "NUM",
 							"to": "0"
@@ -412,7 +419,7 @@
 						},
 						{
 							"type": "changeblock",
-							"text": "Setze die Helligkeit zu 0",
+							"text": "Setze den Wert auf 0",
 							"targetBlockTag": "secondresetblock",
 							"name": "NUM",
 							"to": "0"
@@ -432,7 +439,7 @@
 						},
 						{
 							"type": "changeblock",
-							"text": "Setze die Helligkeit zu 0",
+							"text": "Setze den Wert auf 0",
 							"targetBlockTag": "thirdresetblock",
 							"name": "NUM",
 							"to": "0"
@@ -487,7 +494,7 @@
 						},
 						{
 							"type": "varblock",
-							"text": "Setze die \"r\" Variable als Helligkeit",
+							"text": "Setze die \"r\" Variable als Wert",
 							"parentTag": "rLoopBrightness",
 							"varTag": "r"
 						},
@@ -563,7 +570,7 @@
 						},
 						{
 							"type": "varblock",
-							"text": "Setze die \"g\" Variable als Helligkeit",
+							"text": "Setze die \"g\" Variable als Wert",
 							"parentTag": "gLoopBrightness",
 							"varTag": "g"
 						},
@@ -639,7 +646,7 @@
 						},
 						{
 							"type": "varblock",
-							"text": "Setze die \"b\" Variable als Helligkeit",
+							"text": "Setze die \"b\" Variable als Wert",
 							"parentTag": "bLoopBrightness",
 							"varTag": "b"
 						},
@@ -763,7 +770,7 @@
 						},
 						{
 							"type": "customblockarg",
-							"text": "Nehme das Argument \"pin\" und ziehe es in das erste Argument vom \"Setze LED Helligkeit\" Block",
+							"text": "Nehme das Argument \"pin\" und ziehe es in das erste Argument vom \"Setze Pin Tastverhätnis\" Block",
 							"parentTag": "rLoopBrightness"
 						},
 						{
@@ -787,7 +794,7 @@
 						},
 						{
 							"type": "varblock",
-							"text": "Setze die \"c\" Variable als Helligkeit in der Schleife",
+							"text": "Setze die \"c\" Variable als Wert in der Schleife",
 							"parentTag": "rLoopBrightness",
 							"varTag": "c"
 						},

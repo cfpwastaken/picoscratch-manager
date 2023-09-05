@@ -74,6 +74,12 @@ export const MoveInstruction = z.object({
 	toPreviousBlockTag: z.string(),
 });
 
+export const MoveEventInstruction = z.object({
+	type: z.literal("moveevent"),
+	input: z.string().optional(),
+	parentBlockTag: z.string().optional(),
+});
+
 export const CustomBlockArgInstruction = z.object({
 	type: z.literal("customblockarg"),
 	text: z.string(),
@@ -110,7 +116,8 @@ export const RegularTask = z.object({
 			DeleteInstruction,
 			MoveInstruction,
 			CustomBlockArgInstruction,
-			CustomBlockCallInstruction
+			CustomBlockCallInstruction,
+			MoveEventInstruction
 		])
 	),
 	verification: z.object({
